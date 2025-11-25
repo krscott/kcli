@@ -158,6 +158,31 @@ static void t_long_arg(void)
     assert(STR_EQ(bravo_str, "bar"));
 }
 
+static void t_multi_short(void)
+{
+    char const *argv[] = {"-abcbad"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    bool alpha_flag;
+    bool bravo_flag;
+    char const *charlie_str;
+    bool delta_flag;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_flag = &alpha_flag},
+        {.short_name = 'b', .ptr_flag = &bravo_flag},
+        {.short_name = 'c', .ptr_str = &charlie_str},
+        {.short_name = 'd', .ptr_flag = &delta_flag},
+    );
+
+    assert(alpha_flag);
+    assert(bravo_flag);
+    assert(STR_EQ(charlie_str, "bad"));
+    assert(!delta_flag);
+}
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
@@ -176,6 +201,7 @@ int main(void)
     RUN(t_opt_long_or_short);
     RUN(t_short_arg);
     RUN(t_long_arg);
+    RUN(t_multi_short);
 
     return 0;
 }
