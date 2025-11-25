@@ -1,0 +1,6 @@
+.vscode/
+build/
+CMakeFiles/
+.cache/
+.compile-db/
+result

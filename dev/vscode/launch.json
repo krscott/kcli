@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug LLDB",
+            "type": "lldb-dap",
+            "request": "launch",
+            "program": "build/src/c-start",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "preLaunchTask": "cmake-build"
+        }
+    ]
+}

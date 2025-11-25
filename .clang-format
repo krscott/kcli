@@ -1,0 +1,15 @@
+# see https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+---
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+UseTab: Never
+
+BreakBeforeBraces: Allman
+
+AlignAfterOpenBracket: BlockIndent
+AllowAllArgumentsOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+IndentCaseLabels: true
