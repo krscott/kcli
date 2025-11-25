@@ -1,7 +1,7 @@
 #include "kclilib.h"
 
 #include <assert.h>
-#include <errno.h>
+// #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #define error(msg) printf("CLI Error: " msg "\n")
 #define errorf(fmt, ...) printf("CLI Error: " fmt "\n", __VA_ARGS__)
 
+#if 0
 static bool str2int(char const *const str, long *const out)
 {
     assert(str);
@@ -22,6 +23,7 @@ static bool str2int(char const *const str, long *const out)
     assert(end);
     return (errno == 0) && (*end == '\0');
 }
+#endif
 
 static void
 set_opt_ptr(struct kcli_option const *const opt, char const *const str)
