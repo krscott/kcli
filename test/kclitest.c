@@ -95,6 +95,28 @@ static void t_opt_short_flags(void)
     assert(bravo);
 }
 
+static void t_opt_long_or_short(void)
+{
+    char const *argv[] = {"-a", "--bravo"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    bool alpha;
+    bool bravo;
+    bool charlie;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .long_name = "alpha", .ptr_flag = &alpha},
+        {.short_name = 'b', .long_name = "bravo", .ptr_flag = &bravo},
+        {.short_name = 'c', .long_name = "charlie", .ptr_flag = &charlie},
+    );
+
+    assert(alpha);
+    assert(bravo);
+    assert(charlie);
+}
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \

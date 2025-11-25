@@ -147,6 +147,31 @@ get_total_positionals(struct kcli_option const *const opts, size_t const count)
     return num_pos;
 }
 
+static void
+set_defaults(struct kcli_option const *const opts, size_t const count)
+{
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        bool any = false;
+
+        if (opt->ptr_flag)
+        {
+            *(opt->ptr_flag) = false;
+            any = true;
+        }
+
+        if (opt->ptr_str)
+        {
+            *(opt->ptr_str) = NULL;
+            any = true;
+        }
+
+        // Option must have at least one ptr_* output
+        assert(any);
+    }
+}
+
 bool kcli_parse(
     struct kcli_option const *const opts,
     size_t const count,
@@ -158,6 +183,8 @@ bool kcli_parse(
     assert(count >= 0);
     assert(argv);
     assert(argc >= 0);
+
+    set_defaults(opts, count);
 
     bool ok = true;
 
