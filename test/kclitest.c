@@ -114,7 +114,7 @@ static void t_opt_long_or_short(void)
 
     assert(alpha);
     assert(bravo);
-    assert(charlie);
+    assert(!charlie);
 }
 
 #define RUN(test)                                                              \
@@ -132,6 +132,7 @@ int main(void)
     RUN(t_not_enough_pos);
     RUN(t_opt_long_flags);
     RUN(t_opt_short_flags);
+    RUN(t_opt_long_or_short);
 
     return 0;
 }
