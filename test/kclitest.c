@@ -234,6 +234,29 @@ static void t_float_arg(void)
     assert(DBL_EQ(delta, 100.5));
 }
 
+static void t_double_dash(void)
+{
+
+    char const *argv[] = {"-afoo", "--", "-a", "-1"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha;
+    char const *bravo;
+    long charlie;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_str = &alpha},
+        {.pos_name = "bravo", .ptr_str = &bravo},
+        {.pos_name = "charlie", .ptr_long = &charlie},
+    );
+
+    assert(STR_EQ(alpha, "foo"));
+    assert(STR_EQ(bravo, "-a"));
+    assert(charlie == -1);
+}
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
@@ -255,6 +278,7 @@ int main(void)
     RUN(t_multi_short);
     RUN(t_int_arg);
     RUN(t_float_arg);
+    RUN(t_double_dash);
 
     return 0;
 }

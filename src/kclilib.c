@@ -265,15 +265,18 @@ bool kcli_parse(
 
     bool ok = true;
 
+    bool double_dash = false;
     size_t positional = 0;
 
     for (int i = 0; i < argc; ++i)
     {
         char const *const arg = argv[i];
 
-        // TODO: '--'
-
-        if (str_startswith(arg, "--"))
+        if (!double_dash && 0 == strcmp(arg, "--"))
+        {
+            double_dash = true;
+        }
+        else if (!double_dash && str_startswith(arg, "--"))
         {
             // Long flag
             char const *name = &arg[2];
@@ -309,7 +312,7 @@ bool kcli_parse(
                 set_opt_ptr(&opt, NULL);
             }
         }
-        else if (arg[0] == '-')
+        else if (!double_dash && arg[0] == '-')
         {
             // Short flag(s)
 
