@@ -1,7 +1,7 @@
 #include "kclilib.h"
 
 #include <assert.h>
-// #include <errno.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -11,10 +11,10 @@
 #define error(msg) printf("CLI Error: " msg "\n")
 #define errorf(fmt, ...) printf("CLI Error: " fmt "\n", __VA_ARGS__)
 
-#if 0
-static bool str2int(char const *const str, long *const out)
+static bool str_to_long(char const *const str, long *const out)
 {
     assert(str);
+    assert(out);
 
     char *end = NULL;
 
@@ -24,7 +24,6 @@ static bool str2int(char const *const str, long *const out)
     assert(end);
     return (errno == 0) && (*end == '\0');
 }
-#endif
 
 static bool str_startswith(char const *const str, char const *const prefix)
 {
@@ -69,6 +68,37 @@ static bool str_split(
 }
 
 static void
+set_defaults(struct kcli_option const *const opts, size_t const count)
+{
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        bool any = false;
+
+        if (opt->ptr_flag)
+        {
+            *(opt->ptr_flag) = false;
+            any = true;
+        }
+
+        if (opt->ptr_str)
+        {
+            *(opt->ptr_str) = NULL;
+            any = true;
+        }
+
+        if (opt->ptr_long)
+        {
+            *(opt->ptr_long) = 0;
+            any = true;
+        }
+
+        // Option must have at least one ptr_* output
+        assert(any);
+    }
+}
+
+static void
 set_opt_ptr(struct kcli_option const *const opt, char const *const str)
 {
     assert(opt);
@@ -83,6 +113,17 @@ set_opt_ptr(struct kcli_option const *const opt, char const *const str)
         assert(str);
         *(opt->ptr_str) = str;
     }
+
+    if (opt->ptr_long)
+    {
+        assert(str);
+        str_to_long(str, opt->ptr_long);
+    }
+}
+
+static bool needs_arg(struct kcli_option const *const opt)
+{
+    return opt->ptr_str || opt->ptr_long;
 }
 
 static bool get_long(
@@ -99,8 +140,8 @@ static bool get_long(
     {
         struct kcli_option const *const opt = &opts[i];
 
-        if (strlen(opt->long_name) == size &&
-            0 == strncmp(opt->long_name, name, size))
+        if (opt->long_name && (strlen(opt->long_name) == size) &&
+            (0 == strncmp(opt->long_name, name, size)))
         {
             *out = *opt;
             ok = true;
@@ -133,11 +174,6 @@ static bool get_short(
     }
 
     return ok;
-}
-
-static bool needs_arg(struct kcli_option const *const opt)
-{
-    return opt->ptr_str;
 }
 
 static bool get_nth_positional(
@@ -185,31 +221,6 @@ get_total_positionals(struct kcli_option const *const opts, size_t const count)
     }
 
     return num_pos;
-}
-
-static void
-set_defaults(struct kcli_option const *const opts, size_t const count)
-{
-    for (size_t i = 0; i < count; ++i)
-    {
-        struct kcli_option const *const opt = &opts[i];
-        bool any = false;
-
-        if (opt->ptr_flag)
-        {
-            *(opt->ptr_flag) = false;
-            any = true;
-        }
-
-        if (opt->ptr_str)
-        {
-            *(opt->ptr_str) = NULL;
-            any = true;
-        }
-
-        // Option must have at least one ptr_* output
-        assert(any);
-    }
 }
 
 bool kcli_parse(

@@ -10,8 +10,9 @@ struct kcli_option
     char const *long_name;
     char const *pos_name;
 
-    char const **ptr_str;
     bool *ptr_flag;
+    char const **ptr_str;
+    long *ptr_long;
 };
 
 bool kcli_parse(

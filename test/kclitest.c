@@ -183,6 +183,31 @@ static void t_multi_short(void)
     assert(!delta_flag);
 }
 
+static void t_int_arg(void)
+{
+    char const *argv[] = {"-a51", "123", "--bravo=-100"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    long alpha;
+    long bravo;
+    long charlie;
+    long delta;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_long = &alpha},
+        {.long_name = "bravo", .ptr_long = &bravo},
+        {.long_name = "charlie", .ptr_long = &charlie},
+        {.pos_name = "delta", .ptr_long = &delta},
+    );
+
+    assert(alpha == 51);
+    assert(bravo == -100);
+    assert(charlie == 0);
+    assert(delta == 123);
+}
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
@@ -202,6 +227,7 @@ int main(void)
     RUN(t_short_arg);
     RUN(t_long_arg);
     RUN(t_multi_short);
+    RUN(t_int_arg);
 
     return 0;
 }
