@@ -36,11 +36,11 @@ set_opt_ptr(struct kcli_option const *const opt, char const *const str)
     }
 }
 
-static bool set_nth_positional(
+static bool get_nth_positional(
     struct kcli_option const *const opts,
     size_t const count,
     size_t n,
-    char const *const arg
+    struct kcli_option *const out
 )
 {
     bool ok = false;
@@ -53,7 +53,7 @@ static bool set_nth_positional(
         {
             if (n == 0)
             {
-                set_opt_ptr(opt, arg);
+                *out = *opt;
                 ok = true;
                 break;
             }
@@ -65,6 +65,22 @@ static bool set_nth_positional(
     }
 
     return ok;
+}
+
+static size_t
+get_total_positionals(struct kcli_option const *const opts, size_t const count)
+{
+    size_t num_pos = 0;
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        if (opts[i].pos_name)
+        {
+            ++num_pos;
+        }
+    }
+
+    return num_pos;
 }
 
 bool kcli_parse(
@@ -87,12 +103,26 @@ bool kcli_parse(
     {
         char const *const arg = argv[i];
 
-        if (!set_nth_positional(opts, count, positional++, arg))
+        struct kcli_option opt;
+
+        if (!get_nth_positional(opts, count, positional++, &opt))
         {
             error("Too many positional arguments");
             ok = false;
             break;
         }
+
+        set_opt_ptr(&opt, arg);
+    }
+
+    if (positional < get_total_positionals(opts, count))
+    {
+        struct kcli_option opt;
+        bool const ok2 = get_nth_positional(opts, count, positional - 1, &opt);
+        assert(ok2);
+
+        errorf("Missing argument '%s'", opt.pos_name);
+        ok = false;
     }
 
     return ok;

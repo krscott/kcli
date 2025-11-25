@@ -27,7 +27,6 @@ static void t_opt_pos(void)
 
 static void t_too_many_pos(void)
 {
-
     char const *argv[] = {"foo", "bar"};
     int const argc = KCLI_COUNTOF(argv);
 
@@ -35,6 +34,23 @@ static void t_too_many_pos(void)
 
     struct kcli_option opts[] = {
         {.pos_name = "alpha", .ptr_str = &alpha},
+    };
+
+    bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
+    assert(!ok);
+}
+
+static void t_not_enough_pos(void)
+{
+    char const *argv[] = {"foo"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha;
+    char const *bravo;
+
+    struct kcli_option opts[] = {
+        {.pos_name = "alpha", .ptr_str = &alpha},
+        {.pos_name = "bravo", .ptr_str = &bravo},
     };
 
     bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
@@ -65,6 +81,7 @@ int main(void)
 {
     RUN(t_opt_pos);
     RUN(t_too_many_pos);
+    RUN(t_not_enough_pos);
     // RUN(t_opt_flags);
 
     return 0;
