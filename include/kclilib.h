@@ -13,6 +13,7 @@ struct kcli_option
     bool *ptr_flag;
     char const **ptr_str;
     long *ptr_long;
+    double *ptr_double;
 };
 
 bool kcli_parse(

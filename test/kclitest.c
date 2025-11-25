@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define STR_EQ(a, b) (strcmp(a, b) == 0)
+#define DBL_EQ(a, b) ((a) + 0.01 > (b) && (b) + 0.01 > (a))
 
 static void t_opt_pos(void)
 {
@@ -208,6 +209,31 @@ static void t_int_arg(void)
     assert(delta == 123);
 }
 
+static void t_float_arg(void)
+{
+    char const *argv[] = {"-a-0.5", "100.5", "--bravo=99.5"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    double alpha;
+    double bravo;
+    double charlie;
+    double delta;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_double = &alpha},
+        {.long_name = "bravo", .ptr_double = &bravo},
+        {.long_name = "charlie", .ptr_double = &charlie},
+        {.pos_name = "delta", .ptr_double = &delta},
+    );
+
+    assert(DBL_EQ(alpha, -0.5));
+    assert(DBL_EQ(bravo, 99.5));
+    assert(charlie == 0.0);
+    assert(DBL_EQ(delta, 100.5));
+}
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
@@ -228,6 +254,7 @@ int main(void)
     RUN(t_long_arg);
     RUN(t_multi_short);
     RUN(t_int_arg);
+    RUN(t_float_arg);
 
     return 0;
 }

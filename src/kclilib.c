@@ -25,6 +25,20 @@ static bool str_to_long(char const *const str, long *const out)
     return (errno == 0) && (*end == '\0');
 }
 
+static bool str_to_double(char const *const str, double *const out)
+{
+    assert(str);
+    assert(out);
+
+    char *end = NULL;
+
+    errno = 0;
+    *out = strtod(str, &end);
+
+    assert(end);
+    return (errno == 0) && (*end == '\0');
+}
+
 static bool str_startswith(char const *const str, char const *const prefix)
 {
     return 0 == strncmp(str, prefix, strlen(prefix));
@@ -93,6 +107,12 @@ set_defaults(struct kcli_option const *const opts, size_t const count)
             any = true;
         }
 
+        if (opt->ptr_double)
+        {
+            *(opt->ptr_double) = 0.0;
+            any = true;
+        }
+
         // Option must have at least one ptr_* output
         assert(any);
     }
@@ -119,11 +139,17 @@ set_opt_ptr(struct kcli_option const *const opt, char const *const str)
         assert(str);
         str_to_long(str, opt->ptr_long);
     }
+
+    if (opt->ptr_double)
+    {
+        assert(str);
+        str_to_double(str, opt->ptr_double);
+    }
 }
 
 static bool needs_arg(struct kcli_option const *const opt)
 {
-    return opt->ptr_str || opt->ptr_long;
+    return opt->ptr_str || opt->ptr_long || opt->ptr_double;
 }
 
 static bool get_long(
