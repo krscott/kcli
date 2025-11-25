@@ -26,11 +26,6 @@ static bool str2int(char const *const str, long *const out)
 }
 #endif
 
-static bool str_eq(char const *const a, char const *const b)
-{
-    return 0 == strcmp(a, b);
-}
-
 static bool str_startswith(char const *const str, char const *const prefix)
 {
     return 0 == strncmp(str, prefix, strlen(prefix));
@@ -54,11 +49,21 @@ static bool str_split(
 
     if (str[i] == c)
     {
-        *tail = &str[i + 1];
+        if (tail)
+        {
+            *tail = &str[i + 1];
+        }
         found = true;
     }
+    else if (tail)
+    {
+        *tail = NULL;
+    }
 
-    *head_size = i;
+    if (head_size)
+    {
+        *head_size = i;
+    }
 
     return found;
 }
@@ -84,6 +89,7 @@ static bool get_long(
     struct kcli_option const *const opts,
     size_t const count,
     char const *const name,
+    size_t const size,
     struct kcli_option *const out
 )
 {
@@ -93,7 +99,8 @@ static bool get_long(
     {
         struct kcli_option const *const opt = &opts[i];
 
-        if (str_eq(opt->long_name, name))
+        if (strlen(opt->long_name) == size &&
+            0 == strncmp(opt->long_name, name, size))
         {
             *out = *opt;
             ok = true;
@@ -232,16 +239,38 @@ bool kcli_parse(
         if (str_startswith(arg, "--"))
         {
             // Long flag
+            char const *name = &arg[2];
+
+            char const *value;
+            size_t name_size;
+            bool const split = str_split(name, '=', &name_size, &value);
+
             struct kcli_option opt;
 
-            if (!get_long(opts, count, &arg[2], &opt))
+            if (!get_long(opts, count, name, name_size, &opt))
             {
                 errorf("Option not found: %s", arg);
                 ok = false;
                 goto error;
             }
 
-            set_opt_ptr(&opt, NULL);
+            if (needs_arg(&opt))
+            {
+                if (split)
+                {
+                    // Get str after '='
+                    set_opt_ptr(&opt, value);
+                }
+                else
+                {
+                    // Get next full argument in argv
+                    set_opt_ptr(&opt, argv[++i]);
+                }
+            }
+            else
+            {
+                set_opt_ptr(&opt, NULL);
+            }
         }
         else if (arg[0] == '-')
         {

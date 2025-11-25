@@ -139,23 +139,24 @@ static void t_short_arg(void)
     assert(STR_EQ(charlie_str, "qux"));
 }
 
-// static void t_short_space_arg(void)
-// {
-//     char const *argv[] = {"-a", "foo"};
-//     int const argc = KCLI_COUNTOF(argv);
-//
-//     bool alpha_flag;
-//     char const *alpha_str;
-//
-//     KCLI_PARSE(
-//         argc,
-//         argv,
-//         {.short_name = 'a', .ptr_flag = &alpha_flag, .ptr_str = &alpha_str},
-//     );
-//
-//     assert(alpha_flag);
-//     assert(STR_EQ(alpha_str, "foo"));
-// }
+static void t_long_arg(void)
+{
+    char const *argv[] = {"--alpha=foo", "--bravo", "bar"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha_str;
+    char const *bravo_str;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.long_name = "alpha", .ptr_str = &alpha_str},
+        {.long_name = "bravo", .ptr_str = &bravo_str},
+    );
+
+    assert(STR_EQ(alpha_str, "foo"));
+    assert(STR_EQ(bravo_str, "bar"));
+}
 
 #define RUN(test)                                                              \
     do                                                                         \
@@ -174,6 +175,7 @@ int main(void)
     RUN(t_opt_short_flags);
     RUN(t_opt_long_or_short);
     RUN(t_short_arg);
+    RUN(t_long_arg);
 
     return 0;
 }
