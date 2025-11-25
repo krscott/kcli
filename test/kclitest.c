@@ -117,6 +117,46 @@ static void t_opt_long_or_short(void)
     assert(!charlie);
 }
 
+static void t_short_arg(void)
+{
+    char const *argv[] = {"-a=foo", "-bbar", "-c", "qux"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha_str;
+    char const *bravo_str;
+    char const *charlie_str;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_str = &alpha_str},
+        {.short_name = 'b', .ptr_str = &bravo_str},
+        {.short_name = 'c', .ptr_str = &charlie_str},
+    );
+
+    assert(STR_EQ(alpha_str, "foo"));
+    assert(STR_EQ(bravo_str, "bar"));
+    assert(STR_EQ(charlie_str, "qux"));
+}
+
+// static void t_short_space_arg(void)
+// {
+//     char const *argv[] = {"-a", "foo"};
+//     int const argc = KCLI_COUNTOF(argv);
+//
+//     bool alpha_flag;
+//     char const *alpha_str;
+//
+//     KCLI_PARSE(
+//         argc,
+//         argv,
+//         {.short_name = 'a', .ptr_flag = &alpha_flag, .ptr_str = &alpha_str},
+//     );
+//
+//     assert(alpha_flag);
+//     assert(STR_EQ(alpha_str, "foo"));
+// }
+
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
@@ -133,6 +173,7 @@ int main(void)
     RUN(t_opt_long_flags);
     RUN(t_opt_short_flags);
     RUN(t_opt_long_or_short);
+    RUN(t_short_arg);
 
     return 0;
 }
