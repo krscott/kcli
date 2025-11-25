@@ -3,8 +3,12 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define error(msg) printf("CLI Error: " msg "\n")
+#define errorf(fmt, ...) printf("CLI Error: " fmt "\n", __VA_ARGS__)
 
 static bool str2int(char const *const str, long *const out)
 {
@@ -19,33 +23,77 @@ static bool str2int(char const *const str, long *const out)
     return (errno == 0) && (*end == '\0');
 }
 
-enum kcli_strsum_err
-kcli_strsum(char const *a, char const *b, long *const out)
+static void
+set_opt_ptr(struct kcli_option const *const opt, char const *const str)
 {
+    if (opt->ptr_str)
+    {
+        *(opt->ptr_str) = str;
+    }
+    else
+    {
+        assert(false);
+    }
+}
+
+static bool set_nth_positional(
+    struct kcli_option const *const opts,
+    size_t const count,
+    size_t n,
+    char const *const arg
+)
+{
+    bool ok = false;
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+
+        if (opt->pos_name)
+        {
+            if (n == 0)
+            {
+                set_opt_ptr(opt, arg);
+                ok = true;
+                break;
+            }
+            else
+            {
+                --n;
+            }
+        }
+    }
+
+    return ok;
+}
+
+bool kcli_parse(
+    struct kcli_option const *const opts,
+    size_t const count,
+    int const argc,
+    char const *const *const argv
+)
+{
+    assert(opts);
+    assert(count >= 0);
+    assert(argv);
+    assert(argc >= 0);
+
     bool ok = true;
-    enum kcli_strsum_err err = KCLI_STRSUM_OK;
 
-    long ai;
-    long bi;
+    size_t positional = 0;
 
-    *out = 0;
-
-    ok = str2int(a, &ai);
-    if (!ok)
+    for (int i = 0; i < argc; ++i)
     {
-        err = KCLI_STRSUM_NOT_AN_INT_A;
-        goto error;
+        char const *const arg = argv[i];
+
+        if (!set_nth_positional(opts, count, positional++, arg))
+        {
+            error("Too many positional arguments");
+            ok = false;
+            break;
+        }
     }
 
-    ok = str2int(b, &bi);
-    if (!ok)
-    {
-        err = KCLI_STRSUM_NOT_AN_INT_B;
-        goto error;
-    }
-
-    *out = ai + bi;
-
-error:
-    return err;
+    return ok;
 }

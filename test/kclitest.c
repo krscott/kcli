@@ -1,28 +1,58 @@
 #include "kclilib.h"
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
-static void check_ok(void)
+#define STR_EQ(a, b) (strcmp(a, b) == 0)
+
+static void t_opt_pos(void)
 {
-    long out;
-    enum kcli_strsum_err err = kcli_strsum("11", "22", &out);
-    assert(err == KCLI_STRSUM_OK);
-    assert(out == 33);
+    char const *argv[] = {"foo", "bar"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha;
+    char const *bravo;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.pos_name = "alpha", .ptr_str = &alpha},
+        {.pos_name = "bravo", .ptr_str = &bravo},
+    );
+
+    assert(STR_EQ(alpha, "foo"));
+    assert(STR_EQ(bravo, "bar"));
 }
 
-static void check_fail_a(void)
+static void t_too_many_pos(void)
 {
-    long out;
-    enum kcli_strsum_err err = kcli_strsum("11a", "22", &out);
-    assert(err == KCLI_STRSUM_NOT_AN_INT_A);
+
+    char const *argv[] = {"foo", "bar"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha;
+
+    struct kcli_option opts[] = {
+        {.pos_name = "alpha", .ptr_str = &alpha},
+    };
+
+    bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
+    assert(!ok);
 }
 
-static void check_fail_b(void)
-{
-    long out;
-    enum kcli_strsum_err err = kcli_strsum("11", "foo", &out);
-    assert(err == KCLI_STRSUM_NOT_AN_INT_B);
-}
+// static void t_opt_flags(void)
+// {
+//     char *argv[] = {"--alpha", "-c"};
+//     int const argc = KCLI_COUNTOF(argv);
+//
+//     KCLI_PARSE(
+//         argc,
+//         argv,
+//         {.short_name = 'a', .long_name = "--alpha"},
+//         {.short_name = 'b', .long_name = "--bravo"},
+//     );
+// }
 
 #define RUN(test)                                                              \
     do                                                                         \
@@ -33,9 +63,9 @@ static void check_fail_b(void)
 
 int main(void)
 {
-    RUN(check_ok);
-    RUN(check_fail_a);
-    RUN(check_fail_b);
+    RUN(t_opt_pos);
+    RUN(t_too_many_pos);
+    // RUN(t_opt_flags);
 
     return 0;
 }

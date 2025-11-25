@@ -55,7 +55,7 @@ tst() {
         cd build/test
 
         set -x
-        ctest --output-on-failure
+        ctest --output-on-failure "$@"
     )
 }
 
@@ -64,7 +64,7 @@ ctst() {
         set -eu
 
         cfg
-        tst
+        tst "$@"
     )
 }
 

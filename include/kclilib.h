@@ -2,14 +2,37 @@
 #define KCLILIB_H_
 
 #include <stdbool.h>
+#include <stdlib.h>
 
-enum kcli_strsum_err
+struct kcli_option
 {
-    KCLI_STRSUM_OK,
-    KCLI_STRSUM_NOT_AN_INT_A,
-    KCLI_STRSUM_NOT_AN_INT_B,
+    char const *pos_name;
+    char const **ptr_str;
+    // char short_name;
+    // char const *long_name;
+    // bool *ptr_flag;
 };
 
-enum kcli_strsum_err kcli_strsum(char const *a, char const *b, long *out);
+bool kcli_parse(
+    struct kcli_option const *opts,
+    size_t count,
+    int argc,
+    char const *const *argv
+);
+
+#define KCLI_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+#define KCLI_PARSE(argc, argv, ...)                                            \
+    do                                                                         \
+    {                                                                          \
+        struct kcli_option opts_[] = {__VA_ARGS__};                            \
+                                                                               \
+        bool const ok_ =                                                       \
+            kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
+        if (!ok_)                                                              \
+        {                                                                      \
+            exit(1);                                                           \
+        }                                                                      \
+    } while (0)
 
 #endif
