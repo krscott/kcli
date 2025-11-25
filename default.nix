@@ -5,7 +5,7 @@
   doCheck ? false,
 }:
 stdenv.mkDerivation {
-  name = "c-start";
+  name = "kcli";
   src = lib.cleanSource ./.;
   inherit doCheck;
 

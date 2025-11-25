@@ -1,3 +1,3 @@
-add_executable(c-start main.c)
+add_executable(kcli main.c)
 
-target_link_libraries(c-start cstartlib)
+target_link_libraries(kcli kclilib)

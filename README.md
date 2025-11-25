@@ -1,4 +1,4 @@
-# c-start
+# kcli
 
 My rather opinionated C project template.
 

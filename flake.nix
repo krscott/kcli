@@ -23,7 +23,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
 
         # Final derivation including any overrides made to output package
-        inherit (self.packages.${system}) c-start c-start-gcc;
+        inherit (self.packages.${system}) kcli kcli-gcc;
 
         devPkgs = with pkgs; [
           shfmt
@@ -45,31 +45,31 @@
       in
       {
         packages = {
-          c-start = pkgs.callPackage ./. {
+          kcli = pkgs.callPackage ./. {
             stdenv = pkgs.clangStdenv;
           };
 
-          c-start-gcc = c-start.override {
+          kcli-gcc = kcli.override {
             inherit (pkgs) stdenv;
           };
 
-          c-start-win = c-start.override {
+          kcli-win = kcli.override {
             inherit (pkgs.pkgsCross.mingwW64) stdenv;
           };
 
-          default = c-start;
+          default = kcli;
 
-          c-start-test = c-start.override {
+          kcli-test = kcli.override {
             doCheck = true;
           };
-          c-start-gcc-test = c-start-gcc.override {
+          kcli-gcc-test = kcli-gcc.override {
             doCheck = true;
           };
         };
 
         devShells = {
           default = pkgs.mkShell {
-            inputsFrom = [ c-start ];
+            inputsFrom = [ kcli ];
             nativeBuildInputs = devPkgs;
             shellHook = ''
               source dev_shell.sh

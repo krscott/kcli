@@ -34,7 +34,7 @@ run() {
         bld
 
         set -x
-        ./build/app/c-start "$@"
+        ./build/app/kcli "$@"
     )
 }
 

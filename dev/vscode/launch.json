@@ -5,7 +5,7 @@
             "name": "Debug LLDB",
             "type": "lldb-dap",
             "request": "launch",
-            "program": "build/src/c-start",
+            "program": "build/src/kcli",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,

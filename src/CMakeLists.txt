@@ -1,5 +1,5 @@
-add_library(cstartlib cstartlib.c)
+add_library(kclilib kclilib.c)
 
-target_include_directories(cstartlib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(kclilib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-# target_sources(cstartlib PRIVATE file.c)
+# target_sources(kclilib PRIVATE file.c)

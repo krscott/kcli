@@ -1,4 +1,4 @@
-#include "cstartlib.h"
+#include "kclilib.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -19,11 +19,11 @@ static bool str2int(char const *const str, long *const out)
     return (errno == 0) && (*end == '\0');
 }
 
-enum cstart_strsum_err
-cstart_strsum(char const *a, char const *b, long *const out)
+enum kcli_strsum_err
+kcli_strsum(char const *a, char const *b, long *const out)
 {
     bool ok = true;
-    enum cstart_strsum_err err = CSTART_STRSUM_OK;
+    enum kcli_strsum_err err = KCLI_STRSUM_OK;
 
     long ai;
     long bi;
@@ -33,14 +33,14 @@ cstart_strsum(char const *a, char const *b, long *const out)
     ok = str2int(a, &ai);
     if (!ok)
     {
-        err = CSTART_STRSUM_NOT_AN_INT_A;
+        err = KCLI_STRSUM_NOT_AN_INT_A;
         goto error;
     }
 
     ok = str2int(b, &bi);
     if (!ok)
     {
-        err = CSTART_STRSUM_NOT_AN_INT_B;
+        err = KCLI_STRSUM_NOT_AN_INT_B;
         goto error;
     }
 

@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        package: [c-start, c-start-gcc, c-start-win]
+        package: [kcli, kcli-gcc, kcli-win]
 
     steps:
     - uses: actions/checkout@v4
@@ -41,5 +41,5 @@ jobs:
       run: nix build -L .#${{ matrix.package }}
 
     - name: Test
-      if: matrix.package == 'c-start' || matrix.package == 'c-start-gcc'
+      if: matrix.package == 'kcli' || matrix.package == 'kcli-gcc'
       run: nix build -L .#${{ matrix.package }}-test

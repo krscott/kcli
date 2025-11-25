@@ -1,27 +1,27 @@
-#include "cstartlib.h"
+#include "kclilib.h"
 #include <assert.h>
 #include <stdio.h>
 
 static void check_ok(void)
 {
     long out;
-    enum cstart_strsum_err err = cstart_strsum("11", "22", &out);
-    assert(err == CSTART_STRSUM_OK);
+    enum kcli_strsum_err err = kcli_strsum("11", "22", &out);
+    assert(err == KCLI_STRSUM_OK);
     assert(out == 33);
 }
 
 static void check_fail_a(void)
 {
     long out;
-    enum cstart_strsum_err err = cstart_strsum("11a", "22", &out);
-    assert(err == CSTART_STRSUM_NOT_AN_INT_A);
+    enum kcli_strsum_err err = kcli_strsum("11a", "22", &out);
+    assert(err == KCLI_STRSUM_NOT_AN_INT_A);
 }
 
 static void check_fail_b(void)
 {
     long out;
-    enum cstart_strsum_err err = cstart_strsum("11", "foo", &out);
-    assert(err == CSTART_STRSUM_NOT_AN_INT_B);
+    enum kcli_strsum_err err = kcli_strsum("11", "foo", &out);
+    assert(err == KCLI_STRSUM_NOT_AN_INT_B);
 }
 
 #define RUN(test)                                                              \

@@ -11,7 +11,7 @@ if("$ENV{CC}" MATCHES ".*mingw32.*")
       CACHE BOOL "Unset UNIX for all CMake files")
 endif()
 
-project(c-start LANGUAGES C)
+project(kcli LANGUAGES C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -54,9 +54,9 @@ endif()
 add_subdirectory(src)
 add_subdirectory(app)
 
-set_target_properties(cstartlib c-start PROPERTIES C_STANDARD 11)
+set_target_properties(kclilib kcli PROPERTIES C_STANDARD 11)
 
-install(TARGETS c-start)
+install(TARGETS kcli)
 
 enable_testing()
 add_subdirectory(test)
