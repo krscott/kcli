@@ -6,11 +6,12 @@
 
 struct kcli_option
 {
+    char short_name;
+    char const *long_name;
     char const *pos_name;
+
     char const **ptr_str;
-    // char short_name;
-    // char const *long_name;
-    // bool *ptr_flag;
+    bool *ptr_flag;
 };
 
 bool kcli_parse(

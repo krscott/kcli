@@ -57,23 +57,49 @@ static void t_not_enough_pos(void)
     assert(!ok);
 }
 
-// static void t_opt_flags(void)
-// {
-//     char *argv[] = {"--alpha", "-c"};
-//     int const argc = KCLI_COUNTOF(argv);
-//
-//     KCLI_PARSE(
-//         argc,
-//         argv,
-//         {.short_name = 'a', .long_name = "--alpha"},
-//         {.short_name = 'b', .long_name = "--bravo"},
-//     );
-// }
+static void t_opt_long_flags(void)
+{
+    char const *argv[] = {"--bravo"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    bool alpha;
+    bool bravo;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.long_name = "alpha", .ptr_flag = &alpha},
+        {.long_name = "bravo", .ptr_flag = &bravo},
+    );
+
+    assert(!alpha);
+    assert(bravo);
+}
+
+static void t_opt_short_flags(void)
+{
+    char const *argv[] = {"-b"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    bool alpha;
+    bool bravo;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.short_name = 'a', .ptr_flag = &alpha},
+        {.short_name = 'b', .ptr_flag = &bravo},
+    );
+
+    assert(!alpha);
+    assert(bravo);
+}
 
 #define RUN(test)                                                              \
     do                                                                         \
     {                                                                          \
         printf("Test: " #test "\n");                                           \
+        fflush(stdout);                                                        \
         test();                                                                \
     } while (0)
 
@@ -82,7 +108,8 @@ int main(void)
     RUN(t_opt_pos);
     RUN(t_too_many_pos);
     RUN(t_not_enough_pos);
-    // RUN(t_opt_flags);
+    RUN(t_opt_long_flags);
+    RUN(t_opt_short_flags);
 
     return 0;
 }

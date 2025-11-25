@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define error(msg) printf("CLI Error: " msg "\n")
 #define errorf(fmt, ...) printf("CLI Error: " fmt "\n", __VA_ARGS__)
@@ -25,17 +26,78 @@ static bool str2int(char const *const str, long *const out)
 }
 #endif
 
+static bool str_eq(char const *const a, char const *const b)
+{
+    return 0 == strcmp(a, b);
+}
+
+static bool str_startswith(char const *const str, char const *const prefix)
+{
+    return 0 == strncmp(str, prefix, strlen(prefix));
+}
+
 static void
 set_opt_ptr(struct kcli_option const *const opt, char const *const str)
 {
+    assert(opt);
+
+    if (opt->ptr_flag)
+    {
+        *(opt->ptr_flag) = true;
+    }
+
     if (opt->ptr_str)
     {
         *(opt->ptr_str) = str;
     }
-    else
+}
+
+static bool get_long(
+    struct kcli_option const *const opts,
+    size_t const count,
+    char const *const name,
+    struct kcli_option *const out
+)
+{
+    bool ok = false;
+
+    for (size_t i = 0; i < count; ++i)
     {
-        assert(false);
+        struct kcli_option const *const opt = &opts[i];
+
+        if (str_eq(opt->long_name, name))
+        {
+            *out = *opt;
+            ok = true;
+            break;
+        }
     }
+
+    return ok;
+}
+
+static bool get_short(
+    struct kcli_option const *const opts,
+    size_t const count,
+    char const c,
+    struct kcli_option *const out
+)
+{
+    bool ok = false;
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+
+        if (opt->short_name == c)
+        {
+            *out = *opt;
+            ok = true;
+            break;
+        }
+    }
+
+    return ok;
 }
 
 static bool get_nth_positional(
@@ -107,11 +169,42 @@ bool kcli_parse(
 
         struct kcli_option opt;
 
-        if (!get_nth_positional(opts, count, positional++, &opt))
+        // TODO: '--'
+
+        if (str_startswith(arg, "--"))
         {
-            error("Too many positional arguments");
-            ok = false;
-            break;
+            // Long flag
+
+            if (!get_long(opts, count, &arg[2], &opt))
+            {
+                errorf("Option not found: %s", arg);
+                ok = false;
+                break;
+            }
+        }
+        else if (arg[0] == '-')
+        {
+            // Short flag
+
+            char const c = arg[1];
+
+            if (!get_short(opts, count, c, &opt))
+            {
+                errorf("Option not found: -%c", c);
+                ok = false;
+                break;
+            }
+        }
+        else
+        {
+            // Positional arg
+
+            if (!get_nth_positional(opts, count, positional++, &opt))
+            {
+                error("Too many positional arguments");
+                ok = false;
+                break;
+            }
         }
 
         set_opt_ptr(&opt, arg);
