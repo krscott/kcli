@@ -24,6 +24,8 @@ stdenv.mkDerivation {
       # Workaround broken pkgCross cmake install
       mkdir -p "$out/bin"
       cp build/app/*.exe "$out/bin"
+      mkdir -p "$out/lib"
+      cp build/src/*.a "$out/lib"
     else
       cmake --install build --prefix $out
     fi
