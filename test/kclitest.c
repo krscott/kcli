@@ -58,13 +58,32 @@ static void t_not_enough_pos(void)
     assert(!ok);
 }
 
+static void t_optional_pos(void)
+{
+    char const *argv[] = {"foo"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *alpha;
+    char const *bravo = "default";
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {.pos_name = "alpha", .ptr_str = &alpha},
+        {.pos_name = "bravo", .ptr_str = &bravo, .optional = true},
+    );
+
+    assert(STR_EQ(alpha, "foo"));
+    assert(STR_EQ(bravo, "default"));
+}
+
 static void t_opt_long_flags(void)
 {
     char const *argv[] = {"--bravo"};
     int const argc = KCLI_COUNTOF(argv);
 
-    bool alpha;
-    bool bravo;
+    bool alpha = false;
+    bool bravo = false;
 
     KCLI_PARSE(
         argc,
@@ -82,8 +101,8 @@ static void t_opt_short_flags(void)
     char const *argv[] = {"-b"};
     int const argc = KCLI_COUNTOF(argv);
 
-    bool alpha;
-    bool bravo;
+    bool alpha = false;
+    bool bravo = false;
 
     KCLI_PARSE(
         argc,
@@ -101,9 +120,9 @@ static void t_opt_long_or_short(void)
     char const *argv[] = {"-a", "--bravo"};
     int const argc = KCLI_COUNTOF(argv);
 
-    bool alpha;
-    bool bravo;
-    bool charlie;
+    bool alpha = false;
+    bool bravo = false;
+    bool charlie = false;
 
     KCLI_PARSE(
         argc,
@@ -123,9 +142,9 @@ static void t_short_arg(void)
     char const *argv[] = {"-a=foo", "-bbar", "-c", "qux"};
     int const argc = KCLI_COUNTOF(argv);
 
-    char const *alpha_str;
-    char const *bravo_str;
-    char const *charlie_str;
+    char const *alpha_str = NULL;
+    char const *bravo_str = NULL;
+    char const *charlie_str = NULL;
 
     KCLI_PARSE(
         argc,
@@ -145,8 +164,8 @@ static void t_long_arg(void)
     char const *argv[] = {"--alpha=foo", "--bravo", "bar"};
     int const argc = KCLI_COUNTOF(argv);
 
-    char const *alpha_str;
-    char const *bravo_str;
+    char const *alpha_str = NULL;
+    char const *bravo_str = NULL;
 
     KCLI_PARSE(
         argc,
@@ -164,10 +183,10 @@ static void t_multi_short(void)
     char const *argv[] = {"-abcbad"};
     int const argc = KCLI_COUNTOF(argv);
 
-    bool alpha_flag;
-    bool bravo_flag;
-    char const *charlie_str;
-    bool delta_flag;
+    bool alpha_flag = false;
+    bool bravo_flag = false;
+    char const *charlie_str = NULL;
+    bool delta_flag = false;
 
     KCLI_PARSE(
         argc,
@@ -189,10 +208,10 @@ static void t_int_arg(void)
     char const *argv[] = {"-a51", "123", "--bravo=-100"};
     int const argc = KCLI_COUNTOF(argv);
 
-    long alpha;
-    long bravo;
-    long charlie;
-    long delta;
+    long alpha = 0;
+    long bravo = 0;
+    long charlie = 0;
+    long delta = 0;
 
     KCLI_PARSE(
         argc,
@@ -214,10 +233,10 @@ static void t_float_arg(void)
     char const *argv[] = {"-a-0.5", "100.5", "--bravo=99.5"};
     int const argc = KCLI_COUNTOF(argv);
 
-    double alpha;
-    double bravo;
-    double charlie;
-    double delta;
+    double alpha = 0.0;
+    double bravo = 0.0;
+    double charlie = 0.0;
+    double delta = 0.0;
 
     KCLI_PARSE(
         argc,
@@ -239,9 +258,9 @@ static void t_double_dash(void)
     char const *argv[] = {"-afoo", "--", "-a", "-1"};
     int const argc = KCLI_COUNTOF(argv);
 
-    char const *alpha;
-    char const *bravo;
-    long charlie;
+    char const *alpha = NULL;
+    char const *bravo = NULL;
+    long charlie = 0;
 
     KCLI_PARSE(
         argc,
@@ -258,10 +277,11 @@ static void t_double_dash(void)
 
 static void t_help(void)
 {
-    bool help;
-    char const *alpha;
-    char const *bravo;
-    char const *charlie;
+    bool help = false;
+    char const *alpha = NULL;
+    char const *bravo = NULL;
+    char const *charlie = NULL;
+    char const *delta = "delta-default";
 
     struct kcli_option opts[] = {
         {
@@ -285,6 +305,12 @@ static void t_help(void)
             .ptr_str = &charlie,
             .help = "Argument charlie",
         },
+        {
+            .pos_name = "delta",
+            .ptr_str = &delta,
+            .help = "Argument delta",
+            .optional = true,
+        },
     };
 
     kcli_print_help("t_help", opts, KCLI_COUNTOF(opts));
@@ -303,6 +329,7 @@ int main(void)
     RUN(t_opt_pos);
     RUN(t_too_many_pos);
     RUN(t_not_enough_pos);
+    RUN(t_optional_pos);
     RUN(t_opt_long_flags);
     RUN(t_opt_short_flags);
     RUN(t_opt_long_or_short);

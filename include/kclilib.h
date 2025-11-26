@@ -11,6 +11,8 @@ struct kcli_option
     char const *pos_name;
     char const *help;
 
+    bool optional;
+
     bool *ptr_flag;
     char const **ptr_str;
     long *ptr_long;

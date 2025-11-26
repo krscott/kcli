@@ -92,39 +92,16 @@ static bool is_flag_opt(struct kcli_option const *const opt)
 }
 
 static void
-set_defaults(struct kcli_option const *const opts, size_t const count)
+validate_opts_spec(struct kcli_option const *const opts, size_t const count)
 {
     for (size_t i = 0; i < count; ++i)
     {
         struct kcli_option const *const opt = &opts[i];
-        bool any = false;
-
-        if (opt->ptr_flag)
-        {
-            *(opt->ptr_flag) = false;
-            any = true;
-        }
-
-        if (opt->ptr_str)
-        {
-            *(opt->ptr_str) = NULL;
-            any = true;
-        }
-
-        if (opt->ptr_long)
-        {
-            *(opt->ptr_long) = 0;
-            any = true;
-        }
-
-        if (opt->ptr_double)
-        {
-            *(opt->ptr_double) = 0.0;
-            any = true;
-        }
 
         // Option must have at least one ptr_* output
-        assert(any);
+        assert(
+            opt->ptr_flag || opt->ptr_str || opt->ptr_long || opt->ptr_double
+        );
     }
 }
 
@@ -244,7 +221,7 @@ static bool get_nth_positional(
 }
 
 static size_t
-get_total_positionals(struct kcli_option const *const opts, size_t const count)
+get_min_positionals(struct kcli_option const *const opts, size_t const count)
 {
     size_t num_pos = 0;
 
@@ -252,6 +229,11 @@ get_total_positionals(struct kcli_option const *const opts, size_t const count)
     {
         if (opts[i].pos_name)
         {
+            if (opts[i].optional)
+            {
+                break;
+            }
+
             ++num_pos;
         }
     }
@@ -271,7 +253,7 @@ bool kcli_parse(
     assert(argv);
     assert(argc >= 0);
 
-    set_defaults(opts, count);
+    validate_opts_spec(opts, count);
 
     bool ok = true;
 
@@ -382,7 +364,7 @@ bool kcli_parse(
         }
     }
 
-    if (positional < get_total_positionals(opts, count))
+    if (positional < get_min_positionals(opts, count))
     {
         struct kcli_option opt;
         bool const ok2 = get_nth_positional(opts, count, positional - 1, &opt);
@@ -437,7 +419,14 @@ void kcli_print_usage(
         struct kcli_option const *const opt = &opts[i];
         if (is_positional_opt(opt))
         {
-            printf(" %s", opt->pos_name);
+            if (opt->optional)
+            {
+                printf(" [%s]", opt->pos_name);
+            }
+            else
+            {
+                printf(" %s", opt->pos_name);
+            }
         }
     }
 
