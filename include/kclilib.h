@@ -45,6 +45,7 @@ void kcli_print_help(
             kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
         if (!ok_)                                                              \
         {                                                                      \
+            kcli_print_usage(argv[0], opts_, KCLI_COUNTOF(opts_));             \
             exit(1);                                                           \
         }                                                                      \
     } while (0)
@@ -75,6 +76,7 @@ void kcli_print_help(
                                                                                \
         if (!ok_)                                                              \
         {                                                                      \
+            kcli_print_usage(argv[0], opts_, KCLI_COUNTOF(opts_));             \
             exit(1);                                                           \
         }                                                                      \
     } while (0)
