@@ -1,4 +1,4 @@
-#include "kclilib.h"
+#include "kcli.h"
 
 #include <assert.h>
 #include <errno.h>

@@ -1,5 +1,5 @@
-add_library(kclilib kclilib.c)
+add_library(kcli kcli.c)
 
-target_include_directories(kclilib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(kcli PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-install(TARGETS kclilib)
+install(TARGETS kcli)
