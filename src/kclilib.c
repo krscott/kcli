@@ -81,6 +81,16 @@ static bool str_split(
     return found;
 }
 
+static bool is_positional_opt(struct kcli_option const *const opt)
+{
+    return opt->pos_name != NULL;
+}
+
+static bool is_flag_opt(struct kcli_option const *const opt)
+{
+    return opt->short_name != '\0' || opt->long_name != NULL;
+}
+
 static void
 set_defaults(struct kcli_option const *const opts, size_t const count)
 {
@@ -384,4 +394,142 @@ bool kcli_parse(
 
 error:
     return ok;
+}
+
+static void print_align(int col)
+{
+    int const HELP_INDENT = 20;
+
+    // Check if align should be put on new line
+    if (col > HELP_INDENT)
+    {
+        putchar('\n');
+        col = 0;
+    }
+
+    while (col < HELP_INDENT)
+    {
+        putchar(' ');
+        ++col;
+    }
+}
+
+void kcli_print_usage(
+    char const *const prog_name,
+    struct kcli_option const *const opts,
+    size_t const count
+)
+{
+    printf("Usage: %s", prog_name);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        if (is_flag_opt(opt))
+        {
+            printf(" [opts]");
+            break;
+        }
+    }
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        if (is_positional_opt(opt))
+        {
+            printf(" %s", opt->pos_name);
+        }
+    }
+
+    printf("\n");
+}
+
+void kcli_print_help(
+    char const *const prog_name,
+    struct kcli_option const *const opts,
+    size_t const count
+)
+{
+    kcli_print_usage(prog_name, opts, count);
+
+    bool any_positional = false;
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        if (is_positional_opt(opt))
+        {
+            if (!any_positional)
+            {
+                any_positional = true;
+                printf("\nParameters:\n");
+            }
+
+            int col = printf("  %s ", opt->pos_name);
+
+            if (opt->help)
+            {
+                print_align(col);
+                printf("%s", opt->help);
+            }
+
+            printf("\n");
+        }
+    }
+
+    bool any_flag = false;
+    for (size_t i = 0; i < count; ++i)
+    {
+        struct kcli_option const *const opt = &opts[i];
+        if (is_flag_opt(opt))
+        {
+            if (!any_flag)
+            {
+                any_flag = true;
+                printf("\nOptions:\n");
+            }
+
+            int col = printf("  ");
+
+            if (opt->short_name)
+            {
+                col += printf("-%c", opt->short_name);
+
+                if (needs_arg(opt))
+                {
+                    col += printf("=ARG");
+                }
+            }
+
+            if (opt->short_name && opt->long_name)
+            {
+                col += printf(", ");
+            }
+            else
+            {
+                col += printf(" ");
+            }
+
+            if (opt->long_name)
+            {
+                col += printf("--%s", opt->long_name);
+
+                if (needs_arg(opt))
+                {
+                    col += printf("=ARG ");
+                }
+                else
+                {
+                    col += printf(" ");
+                }
+            }
+
+            if (opt->help)
+            {
+                print_align(col);
+                printf("%s", opt->help);
+            }
+
+            printf("\n");
+        }
+    }
 }

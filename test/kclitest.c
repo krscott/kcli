@@ -236,7 +236,6 @@ static void t_float_arg(void)
 
 static void t_double_dash(void)
 {
-
     char const *argv[] = {"-afoo", "--", "-a", "-1"};
     int const argc = KCLI_COUNTOF(argv);
 
@@ -255,6 +254,40 @@ static void t_double_dash(void)
     assert(STR_EQ(alpha, "foo"));
     assert(STR_EQ(bravo, "-a"));
     assert(charlie == -1);
+}
+
+static void t_help(void)
+{
+    bool help;
+    char const *alpha;
+    char const *bravo;
+    char const *charlie;
+
+    struct kcli_option opts[] = {
+        {
+            .short_name = 'h',
+            .long_name = "help",
+            .help = "Show this help and exit",
+            .ptr_flag = &help,
+        },
+        {
+            .pos_name = "alpha",
+            .ptr_str = &alpha,
+            .help = "Argument alpha",
+        },
+        {
+            .short_name = 'b',
+            .ptr_str = &bravo,
+            .help = "Argument beta",
+        },
+        {
+            .long_name = "charlie-extra-long",
+            .ptr_str = &charlie,
+            .help = "Argument charlie",
+        },
+    };
+
+    kcli_print_help("t_help", opts, KCLI_COUNTOF(opts));
 }
 
 #define RUN(test)                                                              \
@@ -279,6 +312,7 @@ int main(void)
     RUN(t_int_arg);
     RUN(t_float_arg);
     RUN(t_double_dash);
+    RUN(t_help);
 
     return 0;
 }

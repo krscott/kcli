@@ -9,6 +9,7 @@ struct kcli_option
     char short_name;
     char const *long_name;
     char const *pos_name;
+    char const *help;
 
     bool *ptr_flag;
     char const **ptr_str;
@@ -23,15 +24,53 @@ bool kcli_parse(
     char const *const *argv
 );
 
+void kcli_print_usage(
+    char const *prog_name, struct kcli_option const *opts, size_t count
+);
+
+void kcli_print_help(
+    char const *prog_name, struct kcli_option const *opts, size_t count
+);
+
 #define KCLI_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-#define KCLI_PARSE(argc, argv, ...)                                            \
+#define KCLI_PARSE_NO_HELP(argc, argv, ...)                                    \
     do                                                                         \
     {                                                                          \
         struct kcli_option opts_[] = {__VA_ARGS__};                            \
                                                                                \
         bool const ok_ =                                                       \
             kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
+        if (!ok_)                                                              \
+        {                                                                      \
+            exit(1);                                                           \
+        }                                                                      \
+    } while (0)
+
+#define KCLI_PARSE(argc, argv, ...)                                            \
+    do                                                                         \
+    {                                                                          \
+        bool help_;                                                            \
+                                                                               \
+        struct kcli_option opts_[] = {                                         \
+            {                                                                  \
+                .short_name = 'h',                                             \
+                .long_name = "help",                                           \
+                .help = "Show this help and exit",                             \
+                .ptr_flag = &help_,                                            \
+            },                                                                 \
+            __VA_ARGS__                                                        \
+        };                                                                     \
+                                                                               \
+        bool const ok_ =                                                       \
+            kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
+                                                                               \
+        if (help_)                                                             \
+        {                                                                      \
+            kcli_print_help(argv[0], opts_, KCLI_COUNTOF(opts_));              \
+            exit(0);                                                           \
+        }                                                                      \
+                                                                               \
         if (!ok_)                                                              \
         {                                                                      \
             exit(1);                                                           \
