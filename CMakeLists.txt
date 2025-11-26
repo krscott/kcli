@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(kcli LANGUAGES C)
+
 if("$ENV{CC}" MATCHES ".*mingw32.*")
   # Required for Nix pkgCross
   message("Detected mingw32")
@@ -11,9 +13,8 @@ if("$ENV{CC}" MATCHES ".*mingw32.*")
       CACHE BOOL "Unset UNIX for all CMake files")
 endif()
 
-project(kcli LANGUAGES C)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(C_STANDARD 11)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   add_compile_options(
@@ -53,10 +54,6 @@ endif()
 
 add_subdirectory(src)
 add_subdirectory(app)
-
-set_target_properties(kclilib kcli PROPERTIES C_STANDARD 11)
-
-install(TARGETS kcli)
 
 enable_testing()
 add_subdirectory(test)
