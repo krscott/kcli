@@ -47,7 +47,7 @@ static struct opts opts_parse(int const argc, char const *const *const argv)
 
     if (opts.times < 0 || opts.times > 20)
     {
-        printf("--times must be between 0 and 20\n");
+        printf("--times arg must be between 0 and 20\n");
         exit(1);
     }
 

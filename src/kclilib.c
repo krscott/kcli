@@ -105,10 +105,12 @@ validate_opts_spec(struct kcli_option const *const opts, size_t const count)
     }
 }
 
-static void
+static bool
 set_opt_ptr(struct kcli_option const *const opt, char const *const str)
 {
     assert(opt);
+
+    bool ok = true;
 
     if (opt->ptr_flag)
     {
@@ -124,14 +126,24 @@ set_opt_ptr(struct kcli_option const *const opt, char const *const str)
     if (opt->ptr_long)
     {
         assert(str);
-        str_to_long(str, opt->ptr_long);
+        ok = str_to_long(str, opt->ptr_long);
+        if (!ok)
+        {
+            errorf("Expected integer, got: %s", str);
+        }
     }
 
     if (opt->ptr_double)
     {
         assert(str);
-        str_to_double(str, opt->ptr_double);
+        ok = str_to_double(str, opt->ptr_double);
+        if (!ok)
+        {
+            errorf("Expected number, got: %s", str);
+        }
     }
+
+    return ok;
 }
 
 static bool needs_arg(struct kcli_option const *const opt)
@@ -291,7 +303,11 @@ bool kcli_parse(
                 if (split)
                 {
                     // Get str after '='
-                    set_opt_ptr(&opt, value);
+                    ok = set_opt_ptr(&opt, value);
+                    if (!ok)
+                    {
+                        goto error;
+                    }
                 }
                 else
                 {
@@ -302,12 +318,20 @@ bool kcli_parse(
                         goto error;
                     }
                     // Get next full argument in argv
-                    set_opt_ptr(&opt, argv[++i]);
+                    ok = set_opt_ptr(&opt, argv[++i]);
+                    if (!ok)
+                    {
+                        goto error;
+                    }
                 }
             }
             else
             {
-                set_opt_ptr(&opt, NULL);
+                ok = set_opt_ptr(&opt, NULL);
+                if (!ok)
+                {
+                    goto error;
+                }
             }
         }
         else if (!double_dash && arg[0] == '-')
@@ -332,7 +356,11 @@ bool kcli_parse(
                     {
                         case '=':
                             // Get str after '='
-                            set_opt_ptr(&opt, &arg[j + 2]);
+                            ok = set_opt_ptr(&opt, &arg[j + 2]);
+                            if (!ok)
+                            {
+                                goto error;
+                            }
                             break;
 
                         case '\0':
@@ -347,12 +375,20 @@ bool kcli_parse(
                             }
 
                             // Get next full argument in argv
-                            set_opt_ptr(&opt, argv[++i]);
+                            ok = set_opt_ptr(&opt, argv[++i]);
+                            if (!ok)
+                            {
+                                goto error;
+                            }
                             break;
 
                         default:
                             // Get str after short flag
-                            set_opt_ptr(&opt, &arg[j + 1]);
+                            ok = set_opt_ptr(&opt, &arg[j + 1]);
+                            if (!ok)
+                            {
+                                goto error;
+                            }
                             break;
                     }
 
@@ -360,7 +396,11 @@ bool kcli_parse(
                 }
                 else
                 {
-                    set_opt_ptr(&opt, NULL);
+                    ok = set_opt_ptr(&opt, NULL);
+                    if (!ok)
+                    {
+                        goto error;
+                    }
                 }
             }
         }
@@ -376,7 +416,11 @@ bool kcli_parse(
                 goto error;
             }
 
-            set_opt_ptr(&opt, arg);
+            ok = set_opt_ptr(&opt, arg);
+            if (!ok)
+            {
+                goto error;
+            }
         }
     }
 
