@@ -34,7 +34,7 @@ run() {
         bld
 
         set -x
-        ./build/app/kcli "$@"
+        ./build/app/kcli-example "$@"
     )
 }
 
