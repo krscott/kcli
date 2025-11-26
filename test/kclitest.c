@@ -9,7 +9,7 @@
 
 static void t_opt_pos(void)
 {
-    char const *argv[] = {"foo", "bar"};
+    char const *argv[] = {"test", "foo", "bar"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha;
@@ -28,7 +28,7 @@ static void t_opt_pos(void)
 
 static void t_too_many_pos(void)
 {
-    char const *argv[] = {"foo", "bar"};
+    char const *argv[] = {"test", "foo", "bar"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha;
@@ -43,7 +43,7 @@ static void t_too_many_pos(void)
 
 static void t_not_enough_pos(void)
 {
-    char const *argv[] = {"foo"};
+    char const *argv[] = {"test", "foo"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha;
@@ -60,7 +60,7 @@ static void t_not_enough_pos(void)
 
 static void t_optional_pos(void)
 {
-    char const *argv[] = {"foo"};
+    char const *argv[] = {"test", "foo"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha;
@@ -79,7 +79,7 @@ static void t_optional_pos(void)
 
 static void t_opt_long_flags(void)
 {
-    char const *argv[] = {"--bravo"};
+    char const *argv[] = {"test", "--bravo"};
     int const argc = KCLI_COUNTOF(argv);
 
     bool alpha = false;
@@ -98,7 +98,7 @@ static void t_opt_long_flags(void)
 
 static void t_opt_short_flags(void)
 {
-    char const *argv[] = {"-b"};
+    char const *argv[] = {"test", "-b"};
     int const argc = KCLI_COUNTOF(argv);
 
     bool alpha = false;
@@ -117,7 +117,7 @@ static void t_opt_short_flags(void)
 
 static void t_opt_long_or_short(void)
 {
-    char const *argv[] = {"-a", "--bravo"};
+    char const *argv[] = {"test", "-a", "--bravo"};
     int const argc = KCLI_COUNTOF(argv);
 
     bool alpha = false;
@@ -139,7 +139,7 @@ static void t_opt_long_or_short(void)
 
 static void t_short_arg(void)
 {
-    char const *argv[] = {"-a=foo", "-bbar", "-c", "qux"};
+    char const *argv[] = {"test", "-a=foo", "-bbar", "-c", "qux"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha_str = NULL;
@@ -161,7 +161,7 @@ static void t_short_arg(void)
 
 static void t_long_arg(void)
 {
-    char const *argv[] = {"--alpha=foo", "--bravo", "bar"};
+    char const *argv[] = {"test", "--alpha=foo", "--bravo", "bar"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha_str = NULL;
@@ -180,7 +180,7 @@ static void t_long_arg(void)
 
 static void t_multi_short(void)
 {
-    char const *argv[] = {"-abcbad"};
+    char const *argv[] = {"test", "-abcbad"};
     int const argc = KCLI_COUNTOF(argv);
 
     bool alpha_flag = false;
@@ -205,7 +205,7 @@ static void t_multi_short(void)
 
 static void t_int_arg(void)
 {
-    char const *argv[] = {"-a51", "123", "--bravo=-100"};
+    char const *argv[] = {"test", "-a51", "123", "--bravo=-100"};
     int const argc = KCLI_COUNTOF(argv);
 
     long alpha = 0;
@@ -230,7 +230,7 @@ static void t_int_arg(void)
 
 static void t_float_arg(void)
 {
-    char const *argv[] = {"-a-0.5", "100.5", "--bravo=99.5"};
+    char const *argv[] = {"test", "-a-0.5", "100.5", "--bravo=99.5"};
     int const argc = KCLI_COUNTOF(argv);
 
     double alpha = 0.0;
@@ -255,7 +255,7 @@ static void t_float_arg(void)
 
 static void t_double_dash(void)
 {
-    char const *argv[] = {"-afoo", "--", "-a", "-1"};
+    char const *argv[] = {"test", "-afoo", "--", "-a", "-1"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha = NULL;

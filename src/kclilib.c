@@ -251,7 +251,7 @@ bool kcli_parse(
     assert(opts);
     assert(count >= 0);
     assert(argv);
-    assert(argc >= 0);
+    assert(argc > 0);
 
     validate_opts_spec(opts, count);
 
@@ -260,7 +260,7 @@ bool kcli_parse(
     bool double_dash = false;
     size_t positional = 0;
 
-    for (int i = 0; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
         char const *const arg = argv[i];
 
@@ -295,6 +295,12 @@ bool kcli_parse(
                 }
                 else
                 {
+                    if (i + 1 >= argc)
+                    {
+                        errorf("Option requires arg: --%s", opt.long_name);
+                        ok = false;
+                        goto error;
+                    }
                     // Get next full argument in argv
                     set_opt_ptr(&opt, argv[++i]);
                 }
@@ -330,6 +336,16 @@ bool kcli_parse(
                             break;
 
                         case '\0':
+                            if (i + 1 >= argc)
+                            {
+                                errorf(
+                                    "Option requires arg: -%c",
+                                    opt.short_name
+                                );
+                                ok = false;
+                                goto error;
+                            }
+
                             // Get next full argument in argv
                             set_opt_ptr(&opt, argv[++i]);
                             break;
@@ -367,11 +383,12 @@ bool kcli_parse(
     if (positional < get_min_positionals(opts, count))
     {
         struct kcli_option opt;
-        bool const ok2 = get_nth_positional(opts, count, positional - 1, &opt);
+        bool const ok2 = get_nth_positional(opts, count, positional, &opt);
         assert(ok2);
 
         errorf("Missing argument '%s'", opt.pos_name);
         ok = false;
+        goto error;
     }
 
 error:
