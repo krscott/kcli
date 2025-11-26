@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define error(msg) printf("CLI Error: " msg "\n")
-#define errorf(fmt, ...) printf("CLI Error: " fmt "\n", __VA_ARGS__)
+#define error(msg) fprintf(stderr, "CLI Error: " msg "\n")
+#define errorf(fmt, ...) fprintf(stderr, "CLI Error: " fmt "\n", __VA_ARGS__)
 
 static bool str_to_long(char const *const str, long *const out)
 {
@@ -414,19 +414,20 @@ static void print_align(int col)
 }
 
 void kcli_print_usage(
+    FILE *const stream,
     char const *const prog_name,
     struct kcli_option const *const opts,
     size_t const count
 )
 {
-    printf("Usage: %s", prog_name);
+    fprintf(stream, "Usage: %s", prog_name);
 
     for (size_t i = 0; i < count; ++i)
     {
         struct kcli_option const *const opt = &opts[i];
         if (is_flag_opt(opt))
         {
-            printf(" [opts]");
+            fprintf(stream, " [opts]");
             break;
         }
     }
@@ -438,16 +439,16 @@ void kcli_print_usage(
         {
             if (opt->optional)
             {
-                printf(" [%s]", opt->pos_name);
+                fprintf(stream, " [%s]", opt->pos_name);
             }
             else
             {
-                printf(" %s", opt->pos_name);
+                fprintf(stream, " %s", opt->pos_name);
             }
         }
     }
 
-    printf("\n");
+    fprintf(stream, "\n");
 }
 
 void kcli_print_help(
@@ -456,7 +457,7 @@ void kcli_print_help(
     size_t const count
 )
 {
-    kcli_print_usage(prog_name, opts, count);
+    kcli_print_usage(stdout, prog_name, opts, count);
 
     bool any_positional = false;
     for (size_t i = 0; i < count; ++i)

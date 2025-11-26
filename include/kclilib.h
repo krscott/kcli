@@ -2,6 +2,7 @@
 #define KCLILIB_H_
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 struct kcli_option
@@ -27,7 +28,10 @@ bool kcli_parse(
 );
 
 void kcli_print_usage(
-    char const *prog_name, struct kcli_option const *opts, size_t count
+    FILE *stream,
+    char const *prog_name,
+    struct kcli_option const *opts,
+    size_t count
 );
 
 void kcli_print_help(
@@ -45,7 +49,7 @@ void kcli_print_help(
             kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
         if (!ok_)                                                              \
         {                                                                      \
-            kcli_print_usage(argv[0], opts_, KCLI_COUNTOF(opts_));             \
+            kcli_print_usage(stderr, argv[0], opts_, KCLI_COUNTOF(opts_));     \
             exit(1);                                                           \
         }                                                                      \
     } while (0)
@@ -76,7 +80,7 @@ void kcli_print_help(
                                                                                \
         if (!ok_)                                                              \
         {                                                                      \
-            kcli_print_usage(argv[0], opts_, KCLI_COUNTOF(opts_));             \
+            kcli_print_usage(stderr, argv[0], opts_, KCLI_COUNTOF(opts_));     \
             exit(1);                                                           \
         }                                                                      \
     } while (0)
