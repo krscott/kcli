@@ -2,6 +2,7 @@ CompileFlags:
   # compile_commands.json copied here by dev_shell.sh bld()
   CompilationDatabase: ".compile-db"
   Add:
+    - -xc-header
     - -Wno-unused-macros
 
 Diagnostics:
