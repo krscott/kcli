@@ -13,3 +13,4 @@ AllowShortBlocksOnASingleLine: false
 BinPackArguments: false
 BinPackParameters: false
 IndentCaseLabels: true
+AllowShortFunctionsOnASingleLine: false
