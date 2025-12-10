@@ -8,5 +8,8 @@ foreach(src IN LISTS TEST_SRCS)
 
   add_executable(${name} ${src})
   add_test(NAME ${name} COMMAND ${name})
-  target_link_libraries(${name} kcli)
+
+  # Either link or include .inc:
+  # target_link_libraries(${name} kcli)
+  target_include_directories(${name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 endforeach()

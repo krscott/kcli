@@ -1,4 +1,4 @@
-#include "kcli.h"
+#include "kcli.inc"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>

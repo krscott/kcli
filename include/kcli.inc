@@ -1,4 +1,4 @@
-#include "kcli.h"
+#include "kcli.h" // IWYU pragma: export
 
 #include <assert.h>
 #include <errno.h>
