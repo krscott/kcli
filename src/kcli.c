@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define kcli_error(msg) fprintf(stderr, "CLI Error: " msg "\n")
-#define kcli_errorf(fmt, ...)                                                  \
-    fprintf(stderr, "CLI Error: " fmt "\n", __VA_ARGS__)
-
 static bool kcli_str_to_long(char const *const str, long *const out)
 {
     assert(str);

@@ -38,6 +38,9 @@ void kcli_print_help(
     char const *prog_name, struct kcli_option const *opts, size_t count
 );
 
+#define kcli_errorf(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
+#define kcli_error(msg) kcli_errorf("%s", msg)
+
 #define KCLI_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #define KCLI_PARSE_NO_HELP(argc, argv, ...)                                    \
