@@ -260,7 +260,6 @@ bool kcli_parse(
 )
 {
     assert(opts);
-    assert(count >= 0);
     assert(argv);
     assert(argc > 0);
 
