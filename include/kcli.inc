@@ -4,11 +4,12 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static bool kcli_str_to_long(char const *const str, long *const out)
+static bool kcli_str_to_i64(char const *const str, int64_t *const out)
 {
     assert(str);
     assert(out);
@@ -22,7 +23,7 @@ static bool kcli_str_to_long(char const *const str, long *const out)
     return (errno == 0) && (*end == '\0');
 }
 
-static bool kcli_str_to_double(char const *const str, double *const out)
+static bool kcli_str_to_f64(char const *const str, double *const out)
 {
     assert(str);
     assert(out);
@@ -173,7 +174,7 @@ static bool kcli_set_opt_ptr(
         if (opt->ptr_i64)
         {
             assert(str);
-            ok = kcli_str_to_long(str, opt->ptr_i64++);
+            ok = kcli_str_to_i64(str, opt->ptr_i64++);
             if (!ok)
             {
                 snprintf(err, n, "Expected integer, got: %s", str);
@@ -183,7 +184,7 @@ static bool kcli_set_opt_ptr(
         if (opt->ptr_f64)
         {
             assert(str);
-            ok = kcli_str_to_double(str, opt->ptr_f64++);
+            ok = kcli_str_to_f64(str, opt->ptr_f64++);
             if (!ok)
             {
                 snprintf(err, n, "Expected number, got: %s", str);

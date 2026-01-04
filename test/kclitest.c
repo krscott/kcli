@@ -2,6 +2,7 @@
 #include "kcli.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -225,10 +226,10 @@ static void t_int_arg(void)
     char const *argv[] = {"test", "-a51", "123", "--bravo=-100"};
     int const argc = KCLI_COUNTOF(argv);
 
-    long alpha = 0;
-    long bravo = 0;
-    long charlie = 0;
-    long delta = 0;
+    int64_t alpha = 0;
+    int64_t bravo = 0;
+    int64_t charlie = 0;
+    int64_t delta = 0;
 
     KCLI_PARSE(
         argc,
@@ -277,7 +278,7 @@ static void t_double_dash(void)
 
     char const *alpha = NULL;
     char const *bravo = NULL;
-    long charlie = 0;
+    int64_t charlie = 0;
     char const *delta = NULL;
 
     KCLI_PARSE(

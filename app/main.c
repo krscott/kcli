@@ -2,13 +2,14 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 struct opts
 {
     bool verbose;
-    long times;
+    int64_t times;
     char const *first;
     char const *last;
 };
