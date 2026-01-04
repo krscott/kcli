@@ -14,15 +14,20 @@ struct kcli_option
     char const *help;
 
     bool optional;
+    size_t nargs_max;
+    size_t *ptr_nargs;
 
     bool *ptr_flag;
     char const **ptr_str;
     int64_t *ptr_i64;
     double *ptr_f64;
+
+    bool _is_used;
+    bool _is_partially_used;
 };
 
 bool kcli_parse(
-    struct kcli_option const *opts,
+    struct kcli_option *opts,
     size_t count,
     int argc,
     char const *const *argv,

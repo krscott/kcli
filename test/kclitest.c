@@ -1,4 +1,5 @@
 #include "kcli.inc"
+#include "kcli.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -294,6 +295,89 @@ static void t_double_dash(void)
     assert(STR_EQ(delta, "--"));
 }
 
+static void t_duplicate_flag_error(void)
+{
+    char const *argv[] = {"test", "-a", "-a"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    bool alpha_flag = false;
+    bool bravo_flag = false;
+
+    struct kcli_option opts[] = {
+        {.short_name = 'a', .ptr_flag = &alpha_flag},
+        {.short_name = 'b', .ptr_flag = &bravo_flag},
+    };
+
+    char err_buf[256];
+    bool const ok = kcli_parse(
+        opts,
+        KCLI_COUNTOF(opts),
+        (argc),
+        (argv),
+        err_buf,
+        sizeof(err_buf)
+    );
+
+    assert(!ok);
+}
+
+static void t_variable_number_of_args(void)
+{
+    char const *argv[] = {"test", "zero", "one", "two", "three"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *words[10] = {0};
+    size_t nargs = 0;
+
+    KCLI_PARSE(
+        argc,
+        argv,
+        {
+            .name = "word",
+            .ptr_str = words,
+            .ptr_nargs = &nargs,
+            .nargs_max = KCLI_COUNTOF(words),
+        },
+    );
+
+    assert(STR_EQ(words[0], "zero"));
+    assert(STR_EQ(words[1], "one"));
+    assert(STR_EQ(words[2], "two"));
+    assert(STR_EQ(words[3], "three"));
+    assert(words[4] == NULL);
+    assert(nargs == 4);
+}
+
+static void t_variable_number_of_args_overflow(void)
+{
+    char const *argv[] = {"test", "zero", "one", "two", "three"};
+    int const argc = KCLI_COUNTOF(argv);
+
+    char const *words[3] = {0};
+    size_t nargs = 0;
+
+    struct kcli_option opts[] = {
+        {
+            .name = "word",
+            .ptr_str = words,
+            .ptr_nargs = &nargs,
+            .nargs_max = KCLI_COUNTOF(words),
+        },
+    };
+
+    char err_buf[256];
+    bool const ok = kcli_parse(
+        opts,
+        KCLI_COUNTOF(opts),
+        (argc),
+        (argv),
+        err_buf,
+        sizeof(err_buf)
+    );
+
+    assert(!ok);
+}
+
 static void t_help(void)
 {
     bool help = false;
@@ -358,6 +442,9 @@ int main(void)
     RUN(t_int_arg);
     RUN(t_float_arg);
     RUN(t_double_dash);
+    RUN(t_duplicate_flag_error);
+    RUN(t_variable_number_of_args);
+    RUN(t_variable_number_of_args_overflow);
     RUN(t_help);
 
     return 0;

@@ -88,21 +88,49 @@ static bool kcli_is_flag_opt(struct kcli_option const *const opt)
     return opt->short_name != '\0' || opt->long_name != NULL;
 }
 
+static bool kcli_is_array_opt(struct kcli_option const *const opt)
+{
+    return opt->nargs_max >= 1;
+}
+
 static void kcli_validate_opts_spec(
     struct kcli_option const *const opts, size_t const count
 )
 {
+    bool positional_array = false;
+    bool positional_optional = false;
+
     for (size_t i = 0; i < count; ++i)
     {
         struct kcli_option const *const opt = &opts[i];
 
+        // Option must have at least one name
+        assert(opt->name || opt->short_name || opt->long_name);
+
         // Option must have at least one ptr_* output
         assert(opt->ptr_flag || opt->ptr_str || opt->ptr_i64 || opt->ptr_f64);
+
+        if (kcli_is_positional_opt(opt))
+        {
+            // Only the last positional argument may be an array
+            assert(!positional_array);
+            positional_array = opt->nargs_max > 1;
+
+            // A required positional argument must never follow an optional
+            if (positional_optional)
+            {
+                assert(opt->optional);
+            }
+            else
+            {
+                positional_optional = opt->optional;
+            }
+        }
     }
 }
 
 static bool kcli_set_opt_ptr(
-    struct kcli_option const *const opt,
+    struct kcli_option *const opt,
     char const *const str,
     char *const err,
     size_t const n
@@ -112,35 +140,69 @@ static bool kcli_set_opt_ptr(
 
     bool ok = true;
 
-    if (opt->ptr_flag)
+    if (opt->_is_used)
     {
-        *(opt->ptr_flag) = true;
-    }
-
-    if (opt->ptr_str)
-    {
-        assert(str);
-        *(opt->ptr_str) = str;
-    }
-
-    if (opt->ptr_i64)
-    {
-        assert(str);
-        ok = kcli_str_to_long(str, opt->ptr_i64);
-        if (!ok)
+        if (kcli_is_positional_opt(opt))
         {
-            snprintf(err, n, "Expected integer, got: %s", str);
+            snprintf(err, n, "Too many uses of '%s'", opt->name);
         }
-    }
-
-    if (opt->ptr_f64)
-    {
-        assert(str);
-        ok = kcli_str_to_double(str, opt->ptr_f64);
-        if (!ok)
+        else if (opt->long_name)
         {
-            snprintf(err, n, "Expected number, got: %s", str);
+            snprintf(err, n, "Too many uses of '--%s'", opt->long_name);
         }
+        else
+        {
+            snprintf(err, n, "Too many uses of '-%c'", opt->short_name);
+        }
+
+        ok = false;
+    }
+    else
+    {
+        if (opt->ptr_flag)
+        {
+            *(opt->ptr_flag) = true;
+        }
+
+        if (opt->ptr_str)
+        {
+            assert(str);
+            *(opt->ptr_str++) = str;
+        }
+
+        if (opt->ptr_i64)
+        {
+            assert(str);
+            ok = kcli_str_to_long(str, opt->ptr_i64++);
+            if (!ok)
+            {
+                snprintf(err, n, "Expected integer, got: %s", str);
+            }
+        }
+
+        if (opt->ptr_f64)
+        {
+            assert(str);
+            ok = kcli_str_to_double(str, opt->ptr_f64++);
+            if (!ok)
+            {
+                snprintf(err, n, "Expected number, got: %s", str);
+            }
+        }
+
+        if (opt->ptr_nargs)
+        {
+            ++(*opt->ptr_nargs);
+        }
+        if (opt->nargs_max > 1)
+        {
+            --(opt->nargs_max);
+        }
+        else
+        {
+            opt->_is_used = true;
+        }
+        opt->_is_partially_used = true;
     }
 
     return ok;
@@ -152,23 +214,23 @@ static bool kcli_opt_has_arg(struct kcli_option const *const opt)
 }
 
 static bool kcli_get_long_opt(
-    struct kcli_option const *const opts,
+    struct kcli_option *const opts,
     size_t const count,
     char const *const name,
     size_t const size,
-    struct kcli_option *const out
+    struct kcli_option **const out
 )
 {
     bool ok = false;
 
     for (size_t i = 0; i < count; ++i)
     {
-        struct kcli_option const *const opt = &opts[i];
+        struct kcli_option *const opt = &opts[i];
 
         if (opt->long_name && (strlen(opt->long_name) == size) &&
             (0 == strncmp(opt->long_name, name, size)))
         {
-            *out = *opt;
+            *out = opt;
             ok = true;
             break;
         }
@@ -178,21 +240,21 @@ static bool kcli_get_long_opt(
 }
 
 static bool kcli_get_short_opt(
-    struct kcli_option const *const opts,
+    struct kcli_option *const opts,
     size_t const count,
     char const c,
-    struct kcli_option *const out
+    struct kcli_option **const out
 )
 {
     bool ok = false;
 
     for (size_t i = 0; i < count; ++i)
     {
-        struct kcli_option const *const opt = &opts[i];
+        struct kcli_option *const opt = &opts[i];
 
         if (opt->short_name == c)
         {
-            *out = *opt;
+            *out = opt;
             ok = true;
             break;
         }
@@ -201,61 +263,34 @@ static bool kcli_get_short_opt(
     return ok;
 }
 
-static bool kcli_get_nth_positional(
-    struct kcli_option const *const opts,
+static bool kcli_get_next_positional(
+    struct kcli_option *const opts,
     size_t const count,
-    size_t n,
-    struct kcli_option *const out
+    struct kcli_option **const out
 )
 {
     bool ok = false;
 
     for (size_t i = 0; i < count; ++i)
     {
-        struct kcli_option const *const opt = &opts[i];
+        struct kcli_option *const opt = &opts[i];
 
-        if (opt->name)
+        if (kcli_is_positional_opt(opt) && !opt->_is_used)
         {
-            if (n == 0)
+            if (out)
             {
-                *out = *opt;
-                ok = true;
-                break;
+                *out = opt;
             }
-            else
-            {
-                --n;
-            }
+            ok = true;
+            break;
         }
     }
 
     return ok;
 }
 
-static size_t kcli_get_min_positionals(
-    struct kcli_option const *const opts, size_t const count
-)
-{
-    size_t num_pos = 0;
-
-    for (size_t i = 0; i < count; ++i)
-    {
-        if (opts[i].name)
-        {
-            if (opts[i].optional)
-            {
-                break;
-            }
-
-            ++num_pos;
-        }
-    }
-
-    return num_pos;
-}
-
 bool kcli_parse(
-    struct kcli_option const *const opts,
+    struct kcli_option *const opts,
     size_t const count,
     int const argc,
     char const *const *const argv,
@@ -273,7 +308,6 @@ bool kcli_parse(
     bool ok = true;
 
     bool double_dash = false;
-    size_t positional = 0;
 
     for (int i = 1; i < argc; ++i)
     {
@@ -292,7 +326,7 @@ bool kcli_parse(
             size_t name_size;
             bool const split = kcli_str_split(name, '=', &name_size, &value);
 
-            struct kcli_option opt;
+            struct kcli_option *opt;
 
             if (!kcli_get_long_opt(opts, count, name, name_size, &opt))
             {
@@ -301,12 +335,12 @@ bool kcli_parse(
                 goto error;
             }
 
-            if (kcli_opt_has_arg(&opt))
+            if (kcli_opt_has_arg(opt))
             {
                 if (split)
                 {
                     // Get str after '='
-                    ok = kcli_set_opt_ptr(&opt, value, err_buf, err_buf_size);
+                    ok = kcli_set_opt_ptr(opt, value, err_buf, err_buf_size);
                     if (!ok)
                     {
                         goto error;
@@ -320,18 +354,14 @@ bool kcli_parse(
                             err_buf,
                             err_buf_size,
                             "Option requires arg: --%s",
-                            opt.long_name
+                            opt->long_name
                         );
                         ok = false;
                         goto error;
                     }
                     // Get next full argument in argv
-                    ok = kcli_set_opt_ptr(
-                        &opt,
-                        argv[++i],
-                        err_buf,
-                        err_buf_size
-                    );
+                    ok =
+                        kcli_set_opt_ptr(opt, argv[++i], err_buf, err_buf_size);
                     if (!ok)
                     {
                         goto error;
@@ -340,7 +370,7 @@ bool kcli_parse(
             }
             else
             {
-                ok = kcli_set_opt_ptr(&opt, NULL, err_buf, err_buf_size);
+                ok = kcli_set_opt_ptr(opt, NULL, err_buf, err_buf_size);
                 if (!ok)
                 {
                     goto error;
@@ -354,7 +384,7 @@ bool kcli_parse(
             for (size_t j = 1; arg[j]; ++j)
             {
                 char const c = arg[j];
-                struct kcli_option opt;
+                struct kcli_option *opt;
 
                 if (!kcli_get_short_opt(opts, count, c, &opt))
                 {
@@ -363,14 +393,14 @@ bool kcli_parse(
                     goto error;
                 }
 
-                if (kcli_opt_has_arg(&opt))
+                if (kcli_opt_has_arg(opt))
                 {
                     switch (arg[j + 1])
                     {
                         case '=':
                             // Get str after '='
                             ok = kcli_set_opt_ptr(
-                                &opt,
+                                opt,
                                 &arg[j + 2],
                                 err_buf,
                                 err_buf_size
@@ -388,7 +418,7 @@ bool kcli_parse(
                                     err_buf,
                                     err_buf_size,
                                     "Option requires arg: -%c",
-                                    opt.short_name
+                                    opt->short_name
                                 );
                                 ok = false;
                                 goto error;
@@ -396,7 +426,7 @@ bool kcli_parse(
 
                             // Get next full argument in argv
                             ok = kcli_set_opt_ptr(
-                                &opt,
+                                opt,
                                 argv[++i],
                                 err_buf,
                                 err_buf_size
@@ -410,7 +440,7 @@ bool kcli_parse(
                         default:
                             // Get str after short flag
                             ok = kcli_set_opt_ptr(
-                                &opt,
+                                opt,
                                 &arg[j + 1],
                                 err_buf,
                                 err_buf_size
@@ -426,7 +456,7 @@ bool kcli_parse(
                 }
                 else
                 {
-                    ok = kcli_set_opt_ptr(&opt, NULL, err_buf, err_buf_size);
+                    ok = kcli_set_opt_ptr(opt, NULL, err_buf, err_buf_size);
                     if (!ok)
                     {
                         goto error;
@@ -437,9 +467,9 @@ bool kcli_parse(
         else
         {
             // Positional arg
-            struct kcli_option opt;
-
-            if (!kcli_get_nth_positional(opts, count, positional++, &opt))
+            struct kcli_option *opt;
+            ok = kcli_get_next_positional(opts, count, &opt);
+            if (!ok)
             {
                 snprintf(
                     err_buf,
@@ -450,7 +480,7 @@ bool kcli_parse(
                 goto error;
             }
 
-            ok = kcli_set_opt_ptr(&opt, arg, err_buf, err_buf_size);
+            ok = kcli_set_opt_ptr(opt, arg, err_buf, err_buf_size);
             if (!ok)
             {
                 goto error;
@@ -458,15 +488,17 @@ bool kcli_parse(
         }
     }
 
-    if (positional < kcli_get_min_positionals(opts, count))
-    {
-        struct kcli_option opt;
-        bool const ok2 = kcli_get_nth_positional(opts, count, positional, &opt);
-        assert(ok2);
+    // Check for missing positional arg
 
-        snprintf(err_buf, err_buf_size, "Missing argument '%s'", opt.name);
-        ok = false;
-        goto error;
+    {
+        struct kcli_option *opt;
+        if (kcli_get_next_positional(opts, count, &opt) && !opt->optional &&
+            !opt->_is_partially_used)
+        {
+            snprintf(err_buf, err_buf_size, "Missing argument '%s'", opt->name);
+            ok = false;
+            goto error;
+        }
     }
 
 error:
@@ -517,11 +549,25 @@ void kcli_print_usage(
         {
             if (opt->optional)
             {
-                fprintf(stream, " [%s]", opt->name);
+                if (kcli_is_array_opt(opt))
+                {
+                    fprintf(stream, " [%s...]", opt->name);
+                }
+                else
+                {
+                    fprintf(stream, " [%s]", opt->name);
+                }
             }
             else
             {
-                fprintf(stream, " %s", opt->name);
+                if (kcli_is_array_opt(opt))
+                {
+                    fprintf(stream, " %s [%s...]", opt->name, opt->name);
+                }
+                else
+                {
+                    fprintf(stream, " %s", opt->name);
+                }
             }
         }
     }
