@@ -37,7 +37,15 @@ static void t_too_many_pos(void)
         {.name = "alpha", .ptr_str = &alpha},
     };
 
-    bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
+    char err_buf[256];
+    bool const ok = kcli_parse(
+        opts,
+        KCLI_COUNTOF(opts),
+        (argc),
+        (argv),
+        err_buf,
+        sizeof(err_buf)
+    );
     assert(!ok);
 }
 
@@ -54,7 +62,15 @@ static void t_not_enough_pos(void)
         {.name = "bravo", .ptr_str = &bravo},
     };
 
-    bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
+    char err_buf[256];
+    bool const ok = kcli_parse(
+        opts,
+        KCLI_COUNTOF(opts),
+        (argc),
+        (argv),
+        err_buf,
+        sizeof(err_buf)
+    );
     assert(!ok);
 }
 

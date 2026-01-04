@@ -32,6 +32,7 @@ static struct opts opts_parse(int const argc, char const *const *const argv)
             .help = "Last name",
         },
         {
+            .name = "N",
             .short_name = 'n',
             .long_name = "times",
             .ptr_i64 = &opts.times,

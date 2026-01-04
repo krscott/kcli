@@ -25,7 +25,9 @@ bool kcli_parse(
     struct kcli_option const *opts,
     size_t count,
     int argc,
-    char const *const *argv
+    char const *const *argv,
+    char *err_buf,
+    size_t err_buf_size
 );
 
 void kcli_print_usage(
@@ -38,9 +40,6 @@ void kcli_print_usage(
 void kcli_print_help(
     char const *prog_name, struct kcli_option const *opts, size_t count
 );
-
-#define kcli_errorf(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
-#define kcli_error(msg) kcli_errorf("%s", msg)
 
 #define KCLI_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -73,8 +72,16 @@ void kcli_print_help(
             __VA_ARGS__                                                        \
         };                                                                     \
                                                                                \
-        bool const ok_ =                                                       \
-            kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
+        char err_buf_[256];                                                    \
+                                                                               \
+        bool const ok_ = kcli_parse(                                           \
+            opts_,                                                             \
+            KCLI_COUNTOF(opts_),                                               \
+            (argc),                                                            \
+            (argv),                                                            \
+            err_buf_,                                                          \
+            sizeof(err_buf_)                                                   \
+        );                                                                     \
                                                                                \
         if (help_)                                                             \
         {                                                                      \
@@ -84,6 +91,7 @@ void kcli_print_help(
                                                                                \
         if (!ok_)                                                              \
         {                                                                      \
+            fprintf(stderr, "%.*s\n", (int)sizeof(err_buf_), err_buf_);        \
             kcli_print_usage(stderr, argv[0], opts_, KCLI_COUNTOF(opts_));     \
             exit(1);                                                           \
         }                                                                      \
