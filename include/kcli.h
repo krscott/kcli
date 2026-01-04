@@ -46,7 +46,7 @@ void kcli_print_help(
 #define KCLI_PARSE(argc, argv, ...)                                            \
     do                                                                         \
     {                                                                          \
-        bool help_;                                                            \
+        bool help_ = false;                                                    \
                                                                                \
         struct kcli_option opts_[] = {                                         \
             {                                                                  \
