@@ -10,8 +10,8 @@ struct opts
 {
     bool verbose;
     int64_t times;
-    char const *first;
-    char const *last;
+    char const *names[10];
+    size_t names_count;
 };
 
 static struct opts opts_parse(int const argc, char const *const *const argv)
@@ -22,15 +22,11 @@ static struct opts opts_parse(int const argc, char const *const *const argv)
         argc,
         argv,
         {
-            .name = "first",
-            .ptr_str = &opts.first,
-            .help = "First name",
-        },
-        {
-            .name = "last",
-            .ptr_str = &opts.last,
-            .optional = true,
-            .help = "Last name",
+            .name = "name",
+            .ptr_str = opts.names,
+            .ptr_nargs = &opts.names_count,
+            .nargs_max = KCLI_COUNTOF(opts.names),
+            .help = "Name (can specify up to 10)",
         },
         {
             .name = "N",
@@ -62,19 +58,18 @@ int main(int const argc, char const *const *const argv)
 
     if (opts.verbose)
     {
-        printf("Printing hello...\n");
+        // NOTE: 'name' is not optional, so names_count will always be >=1 here
+        //  (enforced by KCLI_PARSE)
+        printf("Printing hello to %s...\n", opts.names[0]);
     }
 
     for (size_t i = 0; i < (size_t)opts.times; ++i)
     {
-        assert(opts.first); // enforced by KCLI_PARSE
-        printf("Hello, %s", opts.first);
-
-        if (opts.last)
+        printf("Hello");
+        for (size_t j = 0; j < opts.names_count; ++j)
         {
-            printf(" %s", opts.last);
+            printf(" %s", opts.names[j]);
         }
-
         printf("!\n");
     }
 
