@@ -18,8 +18,8 @@ static void t_opt_pos(void)
     KCLI_PARSE(
         argc,
         argv,
-        {.pos_name = "alpha", .ptr_str = &alpha},
-        {.pos_name = "bravo", .ptr_str = &bravo},
+        {.name = "alpha", .ptr_str = &alpha},
+        {.name = "bravo", .ptr_str = &bravo},
     );
 
     assert(STR_EQ(alpha, "foo"));
@@ -34,7 +34,7 @@ static void t_too_many_pos(void)
     char const *alpha;
 
     struct kcli_option opts[] = {
-        {.pos_name = "alpha", .ptr_str = &alpha},
+        {.name = "alpha", .ptr_str = &alpha},
     };
 
     bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
@@ -50,8 +50,8 @@ static void t_not_enough_pos(void)
     char const *bravo;
 
     struct kcli_option opts[] = {
-        {.pos_name = "alpha", .ptr_str = &alpha},
-        {.pos_name = "bravo", .ptr_str = &bravo},
+        {.name = "alpha", .ptr_str = &alpha},
+        {.name = "bravo", .ptr_str = &bravo},
     };
 
     bool const ok = kcli_parse(opts, KCLI_COUNTOF(opts), (argc), (argv));
@@ -69,8 +69,8 @@ static void t_optional_pos(void)
     KCLI_PARSE(
         argc,
         argv,
-        {.pos_name = "alpha", .ptr_str = &alpha},
-        {.pos_name = "bravo", .ptr_str = &bravo, .optional = true},
+        {.name = "alpha", .ptr_str = &alpha},
+        {.name = "bravo", .ptr_str = &bravo, .optional = true},
     );
 
     assert(STR_EQ(alpha, "foo"));
@@ -219,7 +219,7 @@ static void t_int_arg(void)
         {.short_name = 'a', .ptr_i64 = &alpha},
         {.long_name = "bravo", .ptr_i64 = &bravo},
         {.long_name = "charlie", .ptr_i64 = &charlie},
-        {.pos_name = "delta", .ptr_i64 = &delta},
+        {.name = "delta", .ptr_i64 = &delta},
     );
 
     assert(alpha == 51);
@@ -244,7 +244,7 @@ static void t_float_arg(void)
         {.short_name = 'a', .ptr_f64 = &alpha},
         {.long_name = "bravo", .ptr_f64 = &bravo},
         {.long_name = "charlie", .ptr_f64 = &charlie},
-        {.pos_name = "delta", .ptr_f64 = &delta},
+        {.name = "delta", .ptr_f64 = &delta},
     );
 
     assert(DBL_EQ(alpha, -0.5));
@@ -266,8 +266,8 @@ static void t_double_dash(void)
         argc,
         argv,
         {.short_name = 'a', .ptr_str = &alpha},
-        {.pos_name = "bravo", .ptr_str = &bravo},
-        {.pos_name = "charlie", .ptr_i64 = &charlie},
+        {.name = "bravo", .ptr_str = &bravo},
+        {.name = "charlie", .ptr_i64 = &charlie},
     );
 
     assert(STR_EQ(alpha, "foo"));
@@ -291,7 +291,7 @@ static void t_help(void)
             .ptr_flag = &help,
         },
         {
-            .pos_name = "alpha",
+            .name = "alpha",
             .ptr_str = &alpha,
             .help = "Argument alpha",
         },
@@ -306,7 +306,7 @@ static void t_help(void)
             .help = "Argument charlie",
         },
         {
-            .pos_name = "delta",
+            .name = "delta",
             .ptr_str = &delta,
             .help = "Argument delta",
             .optional = true,

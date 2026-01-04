@@ -21,12 +21,12 @@ static struct opts opts_parse(int const argc, char const *const *const argv)
         argc,
         argv,
         {
-            .pos_name = "first",
+            .name = "first",
             .ptr_str = &opts.first,
             .help = "First name",
         },
         {
-            .pos_name = "last",
+            .name = "last",
             .ptr_str = &opts.last,
             .optional = true,
             .help = "Last name",

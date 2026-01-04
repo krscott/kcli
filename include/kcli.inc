@@ -80,7 +80,7 @@ static bool kcli_str_split(
 
 static bool kcli_is_positional_opt(struct kcli_option const *const opt)
 {
-    return opt->pos_name != NULL;
+    return opt->name != NULL;
 }
 
 static bool kcli_is_flag_opt(struct kcli_option const *const opt)
@@ -210,7 +210,7 @@ static bool kcli_get_nth_positional(
     {
         struct kcli_option const *const opt = &opts[i];
 
-        if (opt->pos_name)
+        if (opt->name)
         {
             if (n == 0)
             {
@@ -236,7 +236,7 @@ static size_t kcli_get_min_positionals(
 
     for (size_t i = 0; i < count; ++i)
     {
-        if (opts[i].pos_name)
+        if (opts[i].name)
         {
             if (opts[i].optional)
             {
@@ -426,7 +426,7 @@ bool kcli_parse(
         bool const ok2 = kcli_get_nth_positional(opts, count, positional, &opt);
         assert(ok2);
 
-        kcli_errorf("Missing argument '%s'", opt.pos_name);
+        kcli_errorf("Missing argument '%s'", opt.name);
         ok = false;
         goto error;
     }
@@ -479,11 +479,11 @@ void kcli_print_usage(
         {
             if (opt->optional)
             {
-                fprintf(stream, " [%s]", opt->pos_name);
+                fprintf(stream, " [%s]", opt->name);
             }
             else
             {
-                fprintf(stream, " %s", opt->pos_name);
+                fprintf(stream, " %s", opt->name);
             }
         }
     }
@@ -511,7 +511,7 @@ void kcli_print_help(
                 printf("\nParameters:\n");
             }
 
-            int col = printf("  %s ", opt->pos_name);
+            int col = printf("  %s ", opt->name);
 
             if (opt->help)
             {

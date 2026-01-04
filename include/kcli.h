@@ -10,7 +10,7 @@ struct kcli_option
 {
     char short_name;
     char const *long_name;
-    char const *pos_name;
+    char const *name;
     char const *help;
 
     bool optional;
