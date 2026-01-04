@@ -80,7 +80,7 @@ static bool kcli_str_split(
 
 static bool kcli_is_positional_opt(struct kcli_option const *const opt)
 {
-    return opt->name != NULL;
+    return !opt->short_name && !opt->long_name;
 }
 
 static bool kcli_is_flag_opt(struct kcli_option const *const opt)
@@ -581,7 +581,14 @@ void kcli_print_help(
 
                 if (kcli_opt_has_arg(opt))
                 {
-                    col += printf("=ARG");
+                    if (opt->name)
+                    {
+                        col += printf("=%s", opt->name);
+                    }
+                    else
+                    {
+                        col += printf("=ARG");
+                    }
                 }
             }
 
@@ -600,7 +607,14 @@ void kcli_print_help(
 
                 if (kcli_opt_has_arg(opt))
                 {
-                    col += printf("=ARG ");
+                    if (opt->name)
+                    {
+                        col += printf("=%s ", opt->name);
+                    }
+                    else
+                    {
+                        col += printf("=ARG ");
+                    }
                 }
                 else
                 {
