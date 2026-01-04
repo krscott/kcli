@@ -43,20 +43,6 @@ void kcli_print_help(
 
 #define KCLI_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-#define KCLI_PARSE_NO_HELP(argc, argv, ...)                                    \
-    do                                                                         \
-    {                                                                          \
-        struct kcli_option opts_[] = {__VA_ARGS__};                            \
-                                                                               \
-        bool const ok_ =                                                       \
-            kcli_parse(opts_, KCLI_COUNTOF(opts_), (argc), (argv));            \
-        if (!ok_)                                                              \
-        {                                                                      \
-            kcli_print_usage(stderr, argv[0], opts_, KCLI_COUNTOF(opts_));     \
-            exit(1);                                                           \
-        }                                                                      \
-    } while (0)
-
 #define KCLI_PARSE(argc, argv, ...)                                            \
     do                                                                         \
     {                                                                          \
