@@ -34,7 +34,7 @@ static struct opts opts_parse(int const argc, char const *const *const argv)
         {
             .short_name = 'n',
             .long_name = "times",
-            .ptr_long = &opts.times,
+            .ptr_i64 = &opts.times,
             .help = "How many times to print (default: 1)",
         },
         {

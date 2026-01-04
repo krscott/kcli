@@ -97,9 +97,7 @@ static void kcli_validate_opts_spec(
         struct kcli_option const *const opt = &opts[i];
 
         // Option must have at least one ptr_* output
-        assert(
-            opt->ptr_flag || opt->ptr_str || opt->ptr_long || opt->ptr_double
-        );
+        assert(opt->ptr_flag || opt->ptr_str || opt->ptr_i64 || opt->ptr_f64);
     }
 }
 
@@ -121,20 +119,20 @@ kcli_set_opt_ptr(struct kcli_option const *const opt, char const *const str)
         *(opt->ptr_str) = str;
     }
 
-    if (opt->ptr_long)
+    if (opt->ptr_i64)
     {
         assert(str);
-        ok = kcli_str_to_long(str, opt->ptr_long);
+        ok = kcli_str_to_long(str, opt->ptr_i64);
         if (!ok)
         {
             kcli_errorf("Expected integer, got: %s", str);
         }
     }
 
-    if (opt->ptr_double)
+    if (opt->ptr_f64)
     {
         assert(str);
-        ok = kcli_str_to_double(str, opt->ptr_double);
+        ok = kcli_str_to_double(str, opt->ptr_f64);
         if (!ok)
         {
             kcli_errorf("Expected number, got: %s", str);
@@ -146,7 +144,7 @@ kcli_set_opt_ptr(struct kcli_option const *const opt, char const *const str)
 
 static bool kcli_opt_has_arg(struct kcli_option const *const opt)
 {
-    return opt->ptr_str || opt->ptr_long || opt->ptr_double;
+    return opt->ptr_str || opt->ptr_i64 || opt->ptr_f64;
 }
 
 static bool kcli_get_long_opt(

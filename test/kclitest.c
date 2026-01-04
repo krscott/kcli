@@ -216,10 +216,10 @@ static void t_int_arg(void)
     KCLI_PARSE(
         argc,
         argv,
-        {.short_name = 'a', .ptr_long = &alpha},
-        {.long_name = "bravo", .ptr_long = &bravo},
-        {.long_name = "charlie", .ptr_long = &charlie},
-        {.pos_name = "delta", .ptr_long = &delta},
+        {.short_name = 'a', .ptr_i64 = &alpha},
+        {.long_name = "bravo", .ptr_i64 = &bravo},
+        {.long_name = "charlie", .ptr_i64 = &charlie},
+        {.pos_name = "delta", .ptr_i64 = &delta},
     );
 
     assert(alpha == 51);
@@ -241,10 +241,10 @@ static void t_float_arg(void)
     KCLI_PARSE(
         argc,
         argv,
-        {.short_name = 'a', .ptr_double = &alpha},
-        {.long_name = "bravo", .ptr_double = &bravo},
-        {.long_name = "charlie", .ptr_double = &charlie},
-        {.pos_name = "delta", .ptr_double = &delta},
+        {.short_name = 'a', .ptr_f64 = &alpha},
+        {.long_name = "bravo", .ptr_f64 = &bravo},
+        {.long_name = "charlie", .ptr_f64 = &charlie},
+        {.pos_name = "delta", .ptr_f64 = &delta},
     );
 
     assert(DBL_EQ(alpha, -0.5));
@@ -267,7 +267,7 @@ static void t_double_dash(void)
         argv,
         {.short_name = 'a', .ptr_str = &alpha},
         {.pos_name = "bravo", .ptr_str = &bravo},
-        {.pos_name = "charlie", .ptr_long = &charlie},
+        {.pos_name = "charlie", .ptr_i64 = &charlie},
     );
 
     assert(STR_EQ(alpha, "foo"));

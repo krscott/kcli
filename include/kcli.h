@@ -2,6 +2,7 @@
 #define KCLILIB_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,8 +17,8 @@ struct kcli_option
 
     bool *ptr_flag;
     char const **ptr_str;
-    long *ptr_long;
-    double *ptr_double;
+    int64_t *ptr_i64;
+    double *ptr_f64;
 };
 
 bool kcli_parse(
