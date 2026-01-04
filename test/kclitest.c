@@ -271,12 +271,13 @@ static void t_float_arg(void)
 
 static void t_double_dash(void)
 {
-    char const *argv[] = {"test", "-afoo", "--", "-a", "-1"};
+    char const *argv[] = {"test", "-afoo", "--", "-a", "-1", "--"};
     int const argc = KCLI_COUNTOF(argv);
 
     char const *alpha = NULL;
     char const *bravo = NULL;
     long charlie = 0;
+    char const *delta = NULL;
 
     KCLI_PARSE(
         argc,
@@ -284,11 +285,13 @@ static void t_double_dash(void)
         {.short_name = 'a', .ptr_str = &alpha},
         {.name = "bravo", .ptr_str = &bravo},
         {.name = "charlie", .ptr_i64 = &charlie},
+        {.name = "delta", .ptr_str = &delta},
     );
 
     assert(STR_EQ(alpha, "foo"));
     assert(STR_EQ(bravo, "-a"));
     assert(charlie == -1);
+    assert(STR_EQ(delta, "--"));
 }
 
 static void t_help(void)
